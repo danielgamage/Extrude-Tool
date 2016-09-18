@@ -18,6 +18,7 @@
 		_toolBarIcon = [[NSImage alloc] initWithContentsOfFile:[thisBundle pathForImageResource:@"ToolbarIconTemplate"]];
 		[_toolBarIcon setTemplate:YES];
 	}
+
 	return self;
 }
 
@@ -39,7 +40,7 @@
 - (NSString *)trigger {
 	// Return the key that the user can press to activate the tool.
 	// Please make sure to not conflict with other tools.
-	return @"h";
+	return @"x";
 }
 
 - (NSInteger)tempTrigger {
@@ -50,7 +51,7 @@
 - (BOOL)willSelectTempTool:(id)tempTool {
 	// This is called when the user presses a modifier key (e.g. the cmd key to swith to the Select Tool).
 	// Return NO to prevent the tool switching.
-	return YES;
+	return NO;
 }
 
 - (void)keyDown:(NSEvent *)theEvent {
@@ -65,8 +66,8 @@
 - (NSMenu *)defaultContextMenu {
 	// Adds items to the context menu.
 	NSMenu *theMenu = [[NSMenu alloc] initWithTitle:@"Contextual Menu"];
-	[theMenu addItemWithTitle:@"Foo" action:@selector(foo:) keyEquivalent:@""];
-	[theMenu addItemWithTitle:@"Bar" action:@selector(bar:) keyEquivalent:@""];
+//	[theMenu addItemWithTitle:@"Foo" action:@selector(foo:) keyEquivalent:@""];
+//	[theMenu addItemWithTitle:@"Bar" action:@selector(bar:) keyEquivalent:@""];
 	return theMenu;
 }
 
@@ -78,14 +79,55 @@
 - (void)mouseDown:(NSEvent *)theEvent {
 	// Called when the mouse button is clicked.
 	_editViewController = [_windowController activeEditViewController];
-	// editViewController.graphicView.cursor = [NSCursor closedHandCursor];
+    _editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
 	_draggStart = [theEvent locationInWindow];
+
+
+    GSLayer *layer = [_editViewController.graphicView activeLayer];
+//    NSMutableArray *selection = [[NSMutableArray alloc] init];
+//    for (GSElement *element in layer.selection) {
+//        [selection addObject:element];
+//    }
+//    NSLog(@"Index: %d", index);
+
+    NSLog(@"Before Sort: %@", layer.selection);
+
+    NSArray *sortedSelection;
+    sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
+        NSUInteger first = [a.parent indexOfNode:(GSNode *)a];
+        NSUInteger second = [b.parent indexOfNode:(GSNode *)b];
+        NSNumber *one = [NSNumber numberWithInteger:first];
+        NSNumber *two = [NSNumber numberWithInteger:second];
+        return [one compare:two];
+    }];
+
+    NSLog(@"After Sort: %@", sortedSelection);
+
+    GSNode *firstNode = sortedSelection[0];
+    GSNode *lastNode = [sortedSelection lastObject];
+    
+    CGFloat angle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) * 180 / M_PI;
+
+    NSLog(@"Angle: %f", angle);
+    
+    GSPath *path = firstNode.parent;
+    NSInteger firstIndex = [path indexOfNode:(GSNode *)firstNode];
+    NSInteger lastIndex = [path indexOfNode:(GSNode *)lastNode];
+    GSNode *firstHolder = [firstNode copy];
+    GSNode *lastHolder = [firstNode copy];
+    NSLog(@"firstNode: %@", firstNode);
+    NSLog(@"firstHold: %@", firstHolder);
+    [path insertNode:(GSNode *)firstNode atIndex:(NSInteger)firstIndex];
+    [path insertNode:(GSNode *)lastNode atIndex:(NSInteger)lastIndex];
+
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent {
 	// Called when the mouse is moved with the primary button down.
-	NSPoint Loc = [theEvent locationInWindow];
-	NSLog(@"__mouse dragged to : %@", NSStringFromPoint(Loc));
+    NSPoint Loc = [theEvent locationInWindow];
+    float diff = Loc.x - _draggStart.x;
+//	NSLog(@"Loc: %f", diff);
+    
 }
 
 - (void)mouseUp:(NSEvent *)theEvent {
@@ -103,7 +145,7 @@
 
 - (void)drawLayer:(GSLayer *)Layer atPoint:(NSPoint)aPoint asActive:(BOOL)Active attributes:(NSDictionary *)Attributes {
 	// Draw anythin for this particular layer.
-	[_editViewController.graphicView drawLayer:Layer atPoint:aPoint asActive:Active attributes:Attributes];
+	[_editViewController.graphicView drawLayerOutlines:Layer atPoint:aPoint color:[NSColor blackColor] fill:!Active];
 }
 
 - (void)willActivate {

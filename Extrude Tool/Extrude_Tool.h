@@ -10,6 +10,9 @@
 #import <GlyphsCore/GlyphsToolDrawProtocol.h>
 #import <GlyphsCore/GlyphsToolEventProtocol.h>
 #import <GlyphsCore/GlyphsPathPlugin.h>
+#import <GlyphsCore/GSLayer.h>
+#import <GlyphsCore/GSPath.h>
+#import <GlyphsCore/GSNode.h>
 
 @interface Extrude_Tool : GlyphsPathPlugin {
 
