@@ -78,60 +78,6 @@
 	[theMenu insertItemWithTitle:@"Wail" action:@selector(wail:) keyEquivalent:@"" atIndex:[theMenu numberOfItems] - 1];
 }
 
-- (void)mouseDown:(NSEvent *)theEvent {
-	// Called when the mouse button is clicked.
-	_editViewController = [_windowController activeEditViewController];
-    _editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
-	_draggStart = [theEvent locationInWindow];
-
-    layer = [_editViewController.graphicView activeLayer];
-
-//    NSLog(@"Before Sort: %@", layer.selection);
-
-    NSArray *sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
-		NSUInteger first = [layer indexOfPath:a.parent];
-		NSUInteger second = [layer indexOfPath:b.parent];
-		if (first > second) {
-			return NSOrderedDescending;
-		}
-		if (first < second) {
-			return NSOrderedAscending;
-		}
-		
-		first = [a.parent indexOfNode:(GSNode *)a];
-        second = [b.parent indexOfNode:(GSNode *)b];
-		if (first > second) {
-			return NSOrderedDescending;
-		}
-		if (first < second) {
-			return NSOrderedAscending;
-		}
-		return NSOrderedSame;
-    }];
-
-//    NSLog(@"After Sort: %@", sortedSelection);
-
-    GSNode *firstNode = sortedSelection[0];
-    GSNode *lastNode = [sortedSelection lastObject];
-    
-    extrudeAngle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2;
-
-//    NSLog(@"Angle: %f", extrudeAngle);
-
-    GSPath *path = firstNode.parent;
-    NSInteger firstIndex = [path indexOfNode:(GSNode *)firstNode];
-    NSInteger lastIndex = [path indexOfNode:(GSNode *)lastNode];
-    GSNode *firstHolder = [firstNode copy];
-    GSNode *lastHolder = [lastNode copy];
-//    NSLog(@"firstNode: %@", firstNode);
-//    NSLog(@"lastNode : %@", lastNode);
-    // Insert nodes at front and back of selection
-    // Add last node THEN first node so the index remains the same
-    [path insertNode:lastHolder atIndex:lastIndex + 1];
-    [path insertNode:firstHolder atIndex:firstIndex];
-
-}
-
 - (NSPoint)translatePoint:(GSNode *)node withDistance:(double)distance {
     NSPoint newPoint = NSMakePoint(node.positionPrecise.x + distance * cos(extrudeAngle), node.positionPrecise.y + distance * sin(extrudeAngle));
 //    NSLog(@"distance: %f", distance);
@@ -146,7 +92,56 @@
 
     NSPoint Loc = [_editViewController.graphicView getActiveLocation:theEvent];
     if (!_dragging) {
+		// this is called the first time the user draggs. Otherwise it would insert the extra nodes if the user only clicks.
 		self.dragging = YES;
+		_editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
+		_draggStart = [theEvent locationInWindow];
+		
+		layer = [_editViewController.graphicView activeLayer];
+		
+		//    NSLog(@"Before Sort: %@", layer.selection);
+		
+		NSArray *sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
+			NSUInteger first = [layer indexOfPath:a.parent];
+			NSUInteger second = [layer indexOfPath:b.parent];
+			if (first > second) {
+				return NSOrderedDescending;
+			}
+			if (first < second) {
+				return NSOrderedAscending;
+			}
+			
+			first = [a.parent indexOfNode:a];
+			second = [b.parent indexOfNode:b];
+			if (first > second) {
+				return NSOrderedDescending;
+			}
+			if (first < second) {
+				return NSOrderedAscending;
+			}
+			return NSOrderedSame;
+		}];
+		
+		//    NSLog(@"After Sort: %@", sortedSelection);
+		
+		GSNode *firstNode = sortedSelection[0];
+		GSNode *lastNode = [sortedSelection lastObject];
+		
+		extrudeAngle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2;
+		
+		//    NSLog(@"Angle: %f", extrudeAngle);
+		
+		GSPath *path = firstNode.parent;
+		NSInteger firstIndex = [path indexOfNode:firstNode];
+		NSInteger lastIndex = [path indexOfNode:lastNode];
+		GSNode *firstHolder = [firstNode copy];
+		GSNode *lastHolder = [lastNode copy];
+		//    NSLog(@"firstNode: %@", firstNode);
+		//    NSLog(@"lastNode : %@", lastNode);
+		// Insert nodes at front and back of selection
+		// Add last node THEN first node so the index remains the same
+		[path insertNode:lastHolder atIndex:lastIndex + 1];
+		[path insertNode:firstHolder atIndex:firstIndex];
 	}
     // Use mouse position on x axis to translate the points
     // ... should factor in zoom level and translate proportionally
