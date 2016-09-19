@@ -146,12 +146,11 @@
     // Use mouse position on x axis to translate the points
     // ... should factor in zoom level and translate proportionally
     double distance = Loc.x - _draggStart.x;
-
+	
     for (GSNode *node in layer.selection) {
         NSPoint newPoint = [self translatePoint:node withDistance:distance];
         [node setPosition:newPoint];
     }
-
 }
 
 - (void)mouseUp:(NSEvent *)theEvent {
