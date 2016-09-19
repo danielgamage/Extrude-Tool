@@ -88,13 +88,25 @@
 
 //    NSLog(@"Before Sort: %@", layer.selection);
 
-    NSArray *sortedSelection;
-    sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
-        NSUInteger first = [a.parent indexOfNode:(GSNode *)a];
-        NSUInteger second = [b.parent indexOfNode:(GSNode *)b];
-        NSNumber *one = [NSNumber numberWithInteger:first];
-        NSNumber *two = [NSNumber numberWithInteger:second];
-        return [one compare:two];
+    NSArray *sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
+		NSUInteger first = [layer indexOfPath:a.parent];
+		NSUInteger second = [layer indexOfPath:b.parent];
+		if (first > second) {
+			return NSOrderedDescending;
+		}
+		if (first < second) {
+			return NSOrderedAscending;
+		}
+		
+		first = [a.parent indexOfNode:(GSNode *)a];
+        second = [b.parent indexOfNode:(GSNode *)b];
+		if (first > second) {
+			return NSOrderedDescending;
+		}
+		if (first < second) {
+			return NSOrderedAscending;
+		}
+		return NSOrderedSame;
     }];
 
 //    NSLog(@"After Sort: %@", sortedSelection);
