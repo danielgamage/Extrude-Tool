@@ -145,13 +145,16 @@
 	// Called when the mouse is moved with the primary button down.
 
     NSPoint Loc = [_editViewController.graphicView getActiveLocation:theEvent];
+    if (!_dragging) {
+		self.dragging = YES;
+	}
     // Use mouse position on x axis to translate the points
     // ... should factor in zoom level and translate proportionally
     double distance = Loc.x - _draggStart.x;
 
     for (GSNode *node in layer.selection) {
         NSPoint newPoint = [self translatePoint:node withDistance:distance];
-        [node setPositionFast:newPoint];
+        [node setPosition:newPoint];
     }
 
 }
@@ -170,6 +173,8 @@
         NSPoint newPoint = [self translatePoint:node withDistance:distance];
         [node setPosition:newPoint];
     }
+	
+	self.dragging = NO;
 }
 
 - (void)drawBackground {
