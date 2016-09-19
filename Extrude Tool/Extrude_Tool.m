@@ -95,7 +95,7 @@
 		// this is called the first time the user draggs. Otherwise it would insert the extra nodes if the user only clicks.
 		self.dragging = YES;
 		_editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
-		_draggStart = [theEvent locationInWindow];
+		_draggStart = [_editViewController.graphicView getActiveLocation:theEvent];
 		
 		layer = [_editViewController.graphicView activeLayer];
 		
