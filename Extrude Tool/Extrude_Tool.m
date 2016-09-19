@@ -53,7 +53,7 @@
 - (BOOL)willSelectTempTool:(id)tempTool {
 	// This is called when the user presses a modifier key (e.g. the cmd key to swith to the Select Tool).
 	// Return NO to prevent the tool switching.
-	return NO;
+	return YES;
 }
 
 - (void)keyDown:(NSEvent *)theEvent {
@@ -84,13 +84,12 @@
     _editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
 	_draggStart = [theEvent locationInWindow];
 
-    activeLayer = [_editViewController.graphicView activeLayer];
+    layer = [_editViewController.graphicView activeLayer];
 
-    NSLog(@"Active Layer: %@", activeLayer);
-    NSLog(@"Before Sort: %@", activeLayer.selection);
+//    NSLog(@"Before Sort: %@", layer.selection);
 
     NSArray *sortedSelection;
-    sortedSelection = [activeLayer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
+    sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
         NSUInteger first = [a.parent indexOfNode:(GSNode *)a];
         NSUInteger second = [b.parent indexOfNode:(GSNode *)b];
         NSNumber *one = [NSNumber numberWithInteger:first];
@@ -98,14 +97,14 @@
         return [one compare:two];
     }];
 
-    NSLog(@"After Sort: %@", sortedSelection);
+//    NSLog(@"After Sort: %@", sortedSelection);
 
     GSNode *firstNode = sortedSelection[0];
     GSNode *lastNode = [sortedSelection lastObject];
     
     extrudeAngle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2;
 
-    NSLog(@"Angle: %f", extrudeAngle);
+//    NSLog(@"Angle: %f", extrudeAngle);
 
     GSPath *path = firstNode.parent;
     NSInteger firstIndex = [path indexOfNode:(GSNode *)firstNode];
@@ -121,25 +120,26 @@
 
 }
 
+- (NSPoint)translatePoint:(GSNode *)node withDistance:(double)distance {
+    NSPoint newPoint = NSMakePoint(node.positionPrecise.x + distance * cos(extrudeAngle), node.positionPrecise.y + distance * sin(extrudeAngle));
+//    NSLog(@"distance: %f", distance);
+//    NSLog(@"NSPoint X: %f", newPoint.x);
+//    NSLog(@"NSPoint Y: %f", newPoint.y);
+    
+    return newPoint;
+}
+
 - (void)mouseDragged:(NSEvent *)theEvent {
 	// Called when the mouse is moved with the primary button down.
+
     NSPoint Loc = [theEvent locationInWindow];
     
     // Use mouse position on x axis to translate the points
     // ... should factor in zoom level and translate proportionally
-    double mousePositionX = Loc.x - _draggStart.x;
-    
-    double distance = mousePositionX;
-
-    NSLog(@"distance: %f", distance);
-
-    GSLayer *layer = [_editViewController.graphicView activeLayer];
+    double distance = Loc.x - _draggStart.x;
 
     for (GSNode *node in layer.selection) {
-        NSPoint newPoint = NSMakePoint(node.positionPrecise.x + distance * cos(extrudeAngle), node.positionPrecise.y + distance * sin(extrudeAngle));
-        NSLog(@"NSPoint X: %f", newPoint.x);
-        NSLog(@"NSPoint Y: %f", newPoint.y);
-        
+        NSPoint newPoint = [self translatePoint:node withDistance:distance];
         [node setPositionFast:newPoint];
     }
 
@@ -148,24 +148,15 @@
 - (void)mouseUp:(NSEvent *)theEvent {
 	// Called when the primary mouse button is released.
 	// editViewController.graphicView.cursor = [NSCursor openHandCursor];
-    // Called when the mouse is moved with the primary button down.
+
     NSPoint Loc = [theEvent locationInWindow];
     
     // Use mouse position on x axis to translate the points
     // ... should factor in zoom level and translate proportionally
-    double mousePositionX = Loc.x - _draggStart.x;
-    
-    double distance = mousePositionX;
-    
-    NSLog(@"distance: %f", distance);
-    
-    GSLayer *layer = [_editViewController.graphicView activeLayer];
+    double distance = Loc.x - _draggStart.x;
     
     for (GSNode *node in layer.selection) {
-        NSPoint newPoint = NSMakePoint(node.positionPrecise.x + distance * cos(extrudeAngle), node.positionPrecise.y + distance * sin(extrudeAngle));
-        NSLog(@"NSPoint X: %f", newPoint.x);
-        NSLog(@"NSPoint Y: %f", newPoint.y);
-        
+        NSPoint newPoint = [self translatePoint:node withDistance:distance];
         [node setPosition:newPoint];
     }
 }
@@ -180,7 +171,7 @@
 
 - (void)drawLayer:(GSLayer *)Layer atPoint:(NSPoint)aPoint asActive:(BOOL)Active attributes:(NSDictionary *)Attributes {
 	// Draw anythin for this particular layer.
-	[_editViewController.graphicView drawLayer:Layer atPoint:aPoint asActive:Active attributes:Attributes];
+    [_editViewController.graphicView drawLayer:Layer atPoint:aPoint asActive:Active attributes:Attributes];
 }
 
 - (void)willActivate {

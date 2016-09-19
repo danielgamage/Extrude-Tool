@@ -16,6 +16,7 @@
 
 @interface Extrude_Tool : GlyphsPathPlugin {
     double extrudeAngle;
+    GSLayer *layer;
 }
 
 @end
