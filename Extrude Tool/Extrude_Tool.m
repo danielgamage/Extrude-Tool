@@ -171,7 +171,8 @@
 
 - (void)drawLayer:(GSLayer *)Layer atPoint:(NSPoint)aPoint asActive:(BOOL)Active attributes:(NSDictionary *)Attributes {
 	// Draw anythin for this particular layer.
-    [_editViewController.graphicView drawLayer:Layer atPoint:aPoint asActive:Active attributes:Attributes];
+//    [_editViewController.graphicView drawLayer:Layer atPoint:aPoint asActive:true attributes:Attributes];
+    [super drawLayer:Layer atPoint:aPoint asActive:Active attributes:Attributes];
 }
 
 - (void)willActivate {
