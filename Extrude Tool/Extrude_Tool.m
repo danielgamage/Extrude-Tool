@@ -144,8 +144,7 @@
 - (void)mouseDragged:(NSEvent *)theEvent {
 	// Called when the mouse is moved with the primary button down.
 
-    NSPoint Loc = [theEvent locationInWindow];
-    
+    NSPoint Loc = [_editViewController.graphicView getActiveLocation:theEvent];
     // Use mouse position on x axis to translate the points
     // ... should factor in zoom level and translate proportionally
     double distance = Loc.x - _draggStart.x;
@@ -161,7 +160,7 @@
 	// Called when the primary mouse button is released.
 	// editViewController.graphicView.cursor = [NSCursor openHandCursor];
 
-    NSPoint Loc = [theEvent locationInWindow];
+    NSPoint Loc = [_editViewController.graphicView getActiveLocation:theEvent];
     
     // Use mouse position on x axis to translate the points
     // ... should factor in zoom level and translate proportionally
