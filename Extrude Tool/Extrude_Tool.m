@@ -148,6 +148,26 @@
 - (void)mouseUp:(NSEvent *)theEvent {
 	// Called when the primary mouse button is released.
 	// editViewController.graphicView.cursor = [NSCursor openHandCursor];
+    // Called when the mouse is moved with the primary button down.
+    NSPoint Loc = [theEvent locationInWindow];
+    
+    // Use mouse position on x axis to translate the points
+    // ... should factor in zoom level and translate proportionally
+    double mousePositionX = Loc.x - _draggStart.x;
+    
+    double distance = mousePositionX;
+    
+    NSLog(@"distance: %f", distance);
+    
+    GSLayer *layer = [_editViewController.graphicView activeLayer];
+    
+    for (GSNode *node in layer.selection) {
+        NSPoint newPoint = NSMakePoint(node.positionPrecise.x + distance * cos(extrudeAngle), node.positionPrecise.y + distance * sin(extrudeAngle));
+        NSLog(@"NSPoint X: %f", newPoint.x);
+        NSLog(@"NSPoint Y: %f", newPoint.y);
+        
+        [node setPosition:newPoint];
+    }
 }
 
 - (void)drawBackground {
