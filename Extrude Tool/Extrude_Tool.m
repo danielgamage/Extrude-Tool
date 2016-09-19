@@ -83,7 +83,7 @@
 //    NSLog(@"distance: %f", distance);
 //    NSLog(@"NSPoint X: %f", newPoint.x);
 //    NSLog(@"NSPoint Y: %f", newPoint.y);
-    
+
     return newPoint;
 }
 
@@ -96,12 +96,12 @@
 		self.dragging = YES;
 		_editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
 		_draggStart = [_editViewController.graphicView getActiveLocation:theEvent];
-		
+
 		layer = [_editViewController.graphicView activeLayer];
-		
+
 		//    NSLog(@"Before Sort: %@", layer.selection);
-		
-		NSArray *sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
+
+		sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
 			NSUInteger first = [layer indexOfPath:a.parent];
 			NSUInteger second = [layer indexOfPath:b.parent];
 			if (first > second) {
@@ -121,33 +121,33 @@
 			}
 			return NSOrderedSame;
 		}];
-		
+
 		//    NSLog(@"After Sort: %@", sortedSelection);
-		
+
 		GSNode *firstNode = sortedSelection[0];
 		GSNode *lastNode = [sortedSelection lastObject];
-		
+
 		extrudeAngle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2;
-		
+
 		//    NSLog(@"Angle: %f", extrudeAngle);
-		
+
 		GSPath *path = firstNode.parent;
 		NSInteger firstIndex = [path indexOfNode:firstNode];
 		NSInteger lastIndex = [path indexOfNode:lastNode];
 		GSNode *firstHolder = [firstNode copy];
 		GSNode *lastHolder = [lastNode copy];
-		//    NSLog(@"firstNode: %@", firstNode);
-		//    NSLog(@"lastNode : %@", lastNode);
+
 		// Insert nodes at front and back of selection
 		// Add last node THEN first node so the index remains the same
 		[path insertNode:lastHolder atIndex:lastIndex + 1];
 		[path insertNode:firstHolder atIndex:firstIndex];
 	}
+
     // Use mouse position on x axis to translate the points
     // ... should factor in zoom level and translate proportionally
     double distance = Loc.x - _draggStart.x;
-	
-    for (GSNode *node in layer.selection) {
+
+    for (GSNode *node in sortedSelection) {
         NSPoint newPoint = [self translatePoint:node withDistance:distance];
         [node setPosition:newPoint];
     }
