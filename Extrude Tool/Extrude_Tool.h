@@ -15,7 +15,7 @@
 #import <GlyphsCore/GSNode.h>
 
 @interface Extrude_Tool : GlyphsPathPlugin {
-
+    double extrudeAngle;
 }
 
 @end

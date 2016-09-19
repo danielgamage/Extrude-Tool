@@ -19,6 +19,8 @@
 		[_toolBarIcon setTemplate:YES];
 	}
 
+    extrudeAngle = 0;
+
 	return self;
 }
 
@@ -82,18 +84,13 @@
     _editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
 	_draggStart = [theEvent locationInWindow];
 
+    activeLayer = [_editViewController.graphicView activeLayer];
 
-    GSLayer *layer = [_editViewController.graphicView activeLayer];
-//    NSMutableArray *selection = [[NSMutableArray alloc] init];
-//    for (GSElement *element in layer.selection) {
-//        [selection addObject:element];
-//    }
-//    NSLog(@"Index: %d", index);
-
-    NSLog(@"Before Sort: %@", layer.selection);
+    NSLog(@"Active Layer: %@", activeLayer);
+    NSLog(@"Before Sort: %@", activeLayer.selection);
 
     NSArray *sortedSelection;
-    sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
+    sortedSelection = [activeLayer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
         NSUInteger first = [a.parent indexOfNode:(GSNode *)a];
         NSUInteger second = [b.parent indexOfNode:(GSNode *)b];
         NSNumber *one = [NSNumber numberWithInteger:first];
@@ -106,28 +103,46 @@
     GSNode *firstNode = sortedSelection[0];
     GSNode *lastNode = [sortedSelection lastObject];
     
-    CGFloat angle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) * 180 / M_PI;
+    extrudeAngle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2;
 
-    NSLog(@"Angle: %f", angle);
-    
+    NSLog(@"Angle: %f", extrudeAngle);
+
     GSPath *path = firstNode.parent;
     NSInteger firstIndex = [path indexOfNode:(GSNode *)firstNode];
     NSInteger lastIndex = [path indexOfNode:(GSNode *)lastNode];
     GSNode *firstHolder = [firstNode copy];
-    GSNode *lastHolder = [firstNode copy];
-    NSLog(@"firstNode: %@", firstNode);
-    NSLog(@"firstHold: %@", firstHolder);
-    [path insertNode:(GSNode *)firstNode atIndex:(NSInteger)firstIndex];
-    [path insertNode:(GSNode *)lastNode atIndex:(NSInteger)lastIndex];
+    GSNode *lastHolder = [lastNode copy];
+//    NSLog(@"firstNode: %@", firstNode);
+//    NSLog(@"lastNode : %@", lastNode);
+    // Insert nodes at front and back of selection
+    // Add last node THEN first node so the index remains the same
+    [path insertNode:lastHolder atIndex:lastIndex + 1];
+    [path insertNode:firstHolder atIndex:firstIndex];
 
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent {
 	// Called when the mouse is moved with the primary button down.
     NSPoint Loc = [theEvent locationInWindow];
-    float diff = Loc.x - _draggStart.x;
-//	NSLog(@"Loc: %f", diff);
     
+    // Use mouse position on x axis to translate the points
+    // ... should factor in zoom level and translate proportionally
+    double mousePositionX = Loc.x - _draggStart.x;
+    
+    double distance = mousePositionX;
+
+    NSLog(@"distance: %f", distance);
+
+    GSLayer *layer = [_editViewController.graphicView activeLayer];
+
+    for (GSNode *node in layer.selection) {
+        NSPoint newPoint = NSMakePoint(node.positionPrecise.x + distance * cos(extrudeAngle), node.positionPrecise.y + distance * sin(extrudeAngle));
+        NSLog(@"NSPoint X: %f", newPoint.x);
+        NSLog(@"NSPoint Y: %f", newPoint.y);
+        
+        [node setPositionFast:newPoint];
+    }
+
 }
 
 - (void)mouseUp:(NSEvent *)theEvent {
@@ -145,7 +160,7 @@
 
 - (void)drawLayer:(GSLayer *)Layer atPoint:(NSPoint)aPoint asActive:(BOOL)Active attributes:(NSDictionary *)Attributes {
 	// Draw anythin for this particular layer.
-	[_editViewController.graphicView drawLayerOutlines:Layer atPoint:aPoint color:[NSColor blackColor] fill:!Active];
+	[_editViewController.graphicView drawLayer:Layer atPoint:aPoint asActive:Active attributes:Attributes];
 }
 
 - (void)willActivate {
