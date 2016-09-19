@@ -36,7 +36,7 @@
 
 - (NSString *)title {
 	// return the name of the tool as it will appear in the tooltip of in the toolbar.
-	return @"Extrude Tool";
+	return @"Extrude";
 }
 
 - (NSString *)trigger {
