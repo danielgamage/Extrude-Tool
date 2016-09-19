@@ -145,7 +145,7 @@
 
     // Use mouse position on x axis to translate the points
     // ... should factor in zoom level and translate proportionally
-    double distance = Loc.x - _draggStart.x;
+    double distance = (Loc.x - _draggStart.x) / _editViewController.graphicView.scale;
 
     for (GSNode *node in sortedSelection) {
         NSPoint newPoint = [self translatePoint:node withDistance:distance];
