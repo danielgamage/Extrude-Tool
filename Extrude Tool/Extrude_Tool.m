@@ -18,7 +18,7 @@
 		_toolBarIcon = [[NSImage alloc] initWithContentsOfFile:[thisBundle pathForImageResource:@"ToolbarIconTemplate"]];
 		[_toolBarIcon setTemplate:YES];
 	}
-
+    canExtrude = NO;
     self.dragging = NO;
     extrudeAngle = 0;
     sortedSelectionCoords = [[NSMutableArray alloc] init];
@@ -102,7 +102,7 @@
 			NSUInteger second = [layer indexOfPath:b.parent];
 			if (first > second) { return NSOrderedDescending; }
 			if (first < second) { return NSOrderedAscending; }
-			
+
 			first = [a.parent indexOfNode:a];
 			second = [b.parent indexOfNode:b];
 			if (first > second) { return NSOrderedDescending; }
@@ -125,10 +125,18 @@
 		GSNode *firstHolder = [firstNode copy];
 		GSNode *lastHolder = [lastNode copy];
 
-		// Insert nodes at front and back of selection
-		// Add last node THEN first node so the index remains the same
-		[path insertNode:lastHolder atIndex:lastIndex];
-		[path insertNode:firstHolder atIndex:firstIndex];
+    // Disallow Extrusion if first and last nodes in selection are OFFCURVE
+    if ([path nodeAtIndex:firstIndex].type != OFFCURVE && [path nodeAtIndex:lastIndex - 1].type != OFFCURVE) {
+        canExtrude = YES;
+    } else {
+        canExtrude = NO;
+    }
+
+    if (canExtrude == YES) {
+        // Insert nodes at front and back of selection
+        // Add last node THEN first node so the index remains the same
+        [path insertNode:lastHolder atIndex:lastIndex];
+        [path insertNode:firstHolder atIndex:firstIndex];
 
         [[path nodeAtIndex:firstIndex] setConnection:SHARP];
         [[path nodeAtIndex:firstIndex + 1] setConnection:SHARP];
@@ -137,7 +145,10 @@
         [[path nodeAtIndex:lastIndex] setConnection:SHARP];
         [[path nodeAtIndex:lastIndex + 1] setConnection:SHARP];
         [[path nodeAtIndex:lastIndex + 1] setType:LINE];
-	}
+    }
+  }
+
+  if (canExtrude == YES) {
 
     // Use mouse position on x axis to translate the points
     // ... should factor in zoom level and translate proportionally
@@ -151,21 +162,24 @@
         [layer elementDidChange:node];
         index++;
     }
+  }
 
 }
 
 - (void)mouseUp:(NSEvent *)theEvent {
 	// Called when the primary mouse button is released.
+    if (canExtrude == YES) {
 
-    if (_dragging) {
-        NSInteger index = 0;
-        for (GSNode *node in sortedSelection) {
-            CGPoint newPos = node.positionPrecise;
-            CGPoint origin = [sortedSelectionCoords[index] pointValue];
-            [node setPositionFast:origin];
-            [node setPosition:newPos];
-            index++;
-        }
+      if (_dragging) {
+          NSInteger index = 0;
+          for (GSNode *node in sortedSelection) {
+              CGPoint newPos = node.positionPrecise;
+              CGPoint origin = [sortedSelectionCoords[index] pointValue];
+              [node setPositionFast:origin];
+              [node setPosition:newPos];
+              index++;
+          }
+      }
     }
 
     self.dragging = NO;

@@ -16,6 +16,7 @@
 
 @interface Extrude_Tool : GlyphsPathPlugin {
     double extrudeAngle;
+    BOOL canExtrude;
     GSLayer *layer;
     NSArray *sortedSelection;
     NSMutableArray *sortedSelectionCoords;
