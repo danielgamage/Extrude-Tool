@@ -120,14 +120,19 @@
 
 		GSPath *path = firstNode.parent;
 		NSInteger firstIndex = [path indexOfNode:firstNode];
-		NSInteger lastIndex = [path indexOfNode:lastNode];
+		NSInteger lastIndex = [path indexOfNode:lastNode] + 1;
 		GSNode *firstHolder = [firstNode copy];
 		GSNode *lastHolder = [lastNode copy];
 
 		// Insert nodes at front and back of selection
 		// Add last node THEN first node so the index remains the same
-		[path insertNode:lastHolder atIndex:lastIndex + 1];
+		[path insertNode:lastHolder atIndex:lastIndex];
 		[path insertNode:firstHolder atIndex:firstIndex];
+
+        [[path nodeAtIndex:lastIndex] setConnection:SHARP];
+        [[path nodeAtIndex:lastIndex + 1] setConnection:SHARP];
+        [[path nodeAtIndex:firstIndex] setConnection:SHARP];
+        [[path nodeAtIndex:firstIndex + 1] setConnection:SHARP];
 	}
 
     // Use mouse position on x axis to translate the points
