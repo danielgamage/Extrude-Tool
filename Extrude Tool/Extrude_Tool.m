@@ -138,7 +138,8 @@
     for (GSNode *node in sortedSelection) {
         CGPoint origin = [sortedSelectionCoords[index] pointValue];
         NSPoint newPoint = [self translatePoint:origin withDistance:distance];
-        [node setPosition:newPoint];
+        [node setPositionFast:newPoint];
+        [layer elementDidChange:node];
         index++;
     }
 
@@ -147,6 +148,15 @@
 - (void)mouseUp:(NSEvent *)theEvent {
 	// Called when the primary mouse button is released.
 	self.dragging = NO;
+
+    NSInteger index = 0;
+    for (GSNode *node in sortedSelection) {
+        CGPoint newPos = node.positionPrecise;
+        CGPoint origin = [sortedSelectionCoords[index] pointValue];
+        [node setPositionFast:origin];
+        [node setPosition:newPos];
+        index++;
+    }
 
     // empty coordinate cache
     [sortedSelectionCoords removeAllObjects];
