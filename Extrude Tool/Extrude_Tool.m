@@ -130,10 +130,13 @@
 		[path insertNode:lastHolder atIndex:lastIndex];
 		[path insertNode:firstHolder atIndex:firstIndex];
 
-        [[path nodeAtIndex:lastIndex] setConnection:SHARP];
-        [[path nodeAtIndex:lastIndex + 1] setConnection:SHARP];
         [[path nodeAtIndex:firstIndex] setConnection:SHARP];
         [[path nodeAtIndex:firstIndex + 1] setConnection:SHARP];
+        [[path nodeAtIndex:firstIndex + 1] setType:LINE];
+
+        [[path nodeAtIndex:lastIndex] setConnection:SHARP];
+        [[path nodeAtIndex:lastIndex + 1] setConnection:SHARP];
+        [[path nodeAtIndex:lastIndex + 1] setType:LINE];
 	}
 
     // Use mouse position on x axis to translate the points
