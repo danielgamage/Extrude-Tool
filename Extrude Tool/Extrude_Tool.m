@@ -19,6 +19,7 @@
 		[_toolBarIcon setTemplate:YES];
 	}
 
+    self.dragging = NO;
     extrudeAngle = 0;
     sortedSelectionCoords = [[NSMutableArray alloc] init];
 
@@ -152,16 +153,19 @@
 
 - (void)mouseUp:(NSEvent *)theEvent {
 	// Called when the primary mouse button is released.
-	self.dragging = NO;
 
-    NSInteger index = 0;
-    for (GSNode *node in sortedSelection) {
-        CGPoint newPos = node.positionPrecise;
-        CGPoint origin = [sortedSelectionCoords[index] pointValue];
-        [node setPositionFast:origin];
-        [node setPosition:newPos];
-        index++;
+    if (_dragging) {
+        NSInteger index = 0;
+        for (GSNode *node in sortedSelection) {
+            CGPoint newPos = node.positionPrecise;
+            CGPoint origin = [sortedSelectionCoords[index] pointValue];
+            [node setPositionFast:origin];
+            [node setPosition:newPos];
+            index++;
+        }
     }
+
+    self.dragging = NO;
 
     // empty coordinate cache
     [sortedSelectionCoords removeAllObjects];
