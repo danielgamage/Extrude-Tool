@@ -99,37 +99,23 @@
 
 		layer = [_editViewController.graphicView activeLayer];
 
-		//    NSLog(@"Before Sort: %@", layer.selection);
-
 		sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
 			NSUInteger first = [layer indexOfPath:a.parent];
 			NSUInteger second = [layer indexOfPath:b.parent];
-			if (first > second) {
-				return NSOrderedDescending;
-			}
-			if (first < second) {
-				return NSOrderedAscending;
-			}
+			if (first > second) { return NSOrderedDescending; }
+			if (first < second) { return NSOrderedAscending; }
 			
 			first = [a.parent indexOfNode:a];
 			second = [b.parent indexOfNode:b];
-			if (first > second) {
-				return NSOrderedDescending;
-			}
-			if (first < second) {
-				return NSOrderedAscending;
-			}
+			if (first > second) { return NSOrderedDescending; }
+			if (first < second) { return NSOrderedAscending; }
 			return NSOrderedSame;
 		}];
-
-		//    NSLog(@"After Sort: %@", sortedSelection);
 
 		GSNode *firstNode = sortedSelection[0];
 		GSNode *lastNode = [sortedSelection lastObject];
 
 		extrudeAngle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2;
-
-		//    NSLog(@"Angle: %f", extrudeAngle);
 
 		GSPath *path = firstNode.parent;
 		NSInteger firstIndex = [path indexOfNode:firstNode];
