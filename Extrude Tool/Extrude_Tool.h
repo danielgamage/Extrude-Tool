@@ -18,6 +18,7 @@
     double extrudeAngle;
     GSLayer *layer;
     NSArray *sortedSelection;
+    NSMutableArray *sortedSelectionCoords;
 }
 
 @end

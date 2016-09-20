@@ -20,6 +20,7 @@
 	}
 
     extrudeAngle = 0;
+    sortedSelectionCoords = [[NSMutableArray alloc] init];
 
 	return self;
 }
@@ -78,12 +79,8 @@
 	[theMenu insertItemWithTitle:@"Wail" action:@selector(wail:) keyEquivalent:@"" atIndex:[theMenu numberOfItems] - 1];
 }
 
-- (NSPoint)translatePoint:(GSNode *)node withDistance:(double)distance {
-    NSPoint newPoint = NSMakePoint(node.positionPrecise.x + distance * cos(extrudeAngle), node.positionPrecise.y + distance * sin(extrudeAngle));
-//    NSLog(@"distance: %f", distance);
-//    NSLog(@"NSPoint X: %f", newPoint.x);
-//    NSLog(@"NSPoint Y: %f", newPoint.y);
-
+- (NSPoint)translatePoint:(CGPoint)node withDistance:(double)distance {
+    NSPoint newPoint = NSMakePoint(node.x + distance * cos(extrudeAngle), node.y + distance * sin(extrudeAngle));
     return newPoint;
 }
 
@@ -112,6 +109,10 @@
 			return NSOrderedSame;
 		}];
 
+        for (GSNode *node in sortedSelection) {
+            [sortedSelectionCoords addObject:[NSValue valueWithPoint:node.positionPrecise]];
+        }
+
 		GSNode *firstNode = sortedSelection[0];
 		GSNode *lastNode = [sortedSelection lastObject];
 
@@ -133,15 +134,22 @@
     // ... should factor in zoom level and translate proportionally
     double distance = (Loc.x - _draggStart.x) / _editViewController.graphicView.scale;
 
+    NSInteger index = 0;
     for (GSNode *node in sortedSelection) {
-        NSPoint newPoint = [self translatePoint:node withDistance:distance];
+        CGPoint origin = [sortedSelectionCoords[index] pointValue];
+        NSPoint newPoint = [self translatePoint:origin withDistance:distance];
         [node setPosition:newPoint];
+        index++;
     }
+
 }
 
 - (void)mouseUp:(NSEvent *)theEvent {
 	// Called when the primary mouse button is released.
 	self.dragging = NO;
+
+    // empty coordinate cache
+    [sortedSelectionCoords removeAllObjects];
 }
 
 - (void)drawBackground {
