@@ -16,7 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		6579EC711D8BC0E400E662D1 /* Extrude Tool.glyphsTool */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Extrude Tool.glyphsTool"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6579EC711D8BC0E400E662D1 /* ExtrudeTool.glyphsTool */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExtrudeTool.glyphsTool; sourceTree = BUILT_PRODUCTS_DIR; };
 		6579EC741D8BC0E400E662D1 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		6579EC771D8BC0E400E662D1 /* Extrude Tool-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Extrude Tool-Prefix.pch"; sourceTree = "<group>"; };
 		6579EC791D8BC0E400E662D1 /* Extrude Tool-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Extrude Tool-Info.plist"; sourceTree = "<group>"; };
@@ -52,7 +52,7 @@
 		6579EC721D8BC0E400E662D1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6579EC711D8BC0E400E662D1 /* Extrude Tool.glyphsTool */,
+				6579EC711D8BC0E400E662D1 /* ExtrudeTool.glyphsTool */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -104,7 +104,7 @@
 			);
 			name = "Extrude Tool";
 			productName = "Extrude Tool";
-			productReference = 6579EC711D8BC0E400E662D1 /* Extrude Tool.glyphsTool */;
+			productReference = 6579EC711D8BC0E400E662D1 /* ExtrudeTool.glyphsTool */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -257,7 +257,7 @@
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
 				PRODUCT_BUNDLE_IDENTIFIER = "danielgamage.Extrude-Tool";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = ExtrudeTool;
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = glyphsTool;
 			};
@@ -272,7 +272,7 @@
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
 				PRODUCT_BUNDLE_IDENTIFIER = "danielgamage.Extrude-Tool";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = ExtrudeTool;
 				SKIP_INSTALL = NO;
 				WRAPPER_EXTENSION = glyphsTool;
 			};
@@ -297,6 +297,7 @@
 				6579EC881D8BC0E400E662D1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
