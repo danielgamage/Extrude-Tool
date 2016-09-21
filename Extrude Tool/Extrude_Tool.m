@@ -67,11 +67,13 @@
         _draggStart = [_editViewController.graphicView getActiveLocation:theEvent];
 
         sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
+            // Sort by path parent
             NSUInteger first = [layer indexOfPath:a.parent];
             NSUInteger second = [layer indexOfPath:b.parent];
             if (first > second) { return NSOrderedDescending; }
             if (first < second) { return NSOrderedAscending; }
 
+            // Then sort by node index
             first = [a.parent indexOfNode:a];
             second = [b.parent indexOfNode:b];
             if (first > second) { return NSOrderedDescending; }
@@ -127,6 +129,8 @@
         for (GSNode *node in sortedSelection) {
             CGPoint origin = [sortedSelectionCoords[index] pointValue];
             NSPoint newPoint = [self translatePoint:origin withDistance:distance];
+            // setPositionFast so not EVERY update is logged in history.
+            // force paint in elementDidChange because setPositionFast doesn't notify
             [node setPositionFast:newPoint];
             [layer elementDidChange:node];
             index++;
@@ -144,6 +148,7 @@
             for (GSNode *node in sortedSelection) {
                 CGPoint newPos = node.positionPrecise;
                 CGPoint origin = [sortedSelectionCoords[index] pointValue];
+                // revert to origin first so that history log shows move from point@origin to point@newPos, instead of form wherever mouseDragged left off
                 [node setPositionFast:origin];
                 [node setPosition:newPos];
                 index++;
