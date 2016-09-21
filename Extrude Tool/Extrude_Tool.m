@@ -85,12 +85,26 @@
             [sortedSelectionCoords addObject:[NSValue valueWithPoint:node.positionPrecise]];
         }
 
+
         GSNode *firstNode = sortedSelection[0];
         GSNode *lastNode = [sortedSelection lastObject];
+        GSPath *path = firstNode.parent;
+
+        // If first & last nodes are selected, the selection crosses bounds of the array
+        if ([sortedSelection containsObject:[path.nodes firstObject]] && [sortedSelection containsObject:[path.nodes lastObject]]) {
+            crossesBounds = YES;
+
+            // Reassign first and last nodes accordingly
+            for (NSUInteger i=0; [sortedSelection containsObject:path.nodes[i]]; i++) {
+                lastNode = path.nodes[i]; }
+            for (NSUInteger d=path.nodes.count - 1; [sortedSelection containsObject:path.nodes[d]]; d--) {
+                firstNode = path.nodes[d]; }
+        } else {
+            crossesBounds = NO;
+        }
 
         extrudeAngle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2;
 
-        GSPath *path = firstNode.parent;
         NSInteger firstIndex = [path indexOfNode:firstNode];
         NSInteger lastIndex = [path indexOfNode:lastNode] + 1;
         GSNode *firstHolder = [firstNode copy];
@@ -104,18 +118,31 @@
         }
 
         if (canExtrude == YES) {
-            // Insert nodes at front and back of selection
-            // Add last node THEN first node so the index remains the same
-            [path insertNode:lastHolder atIndex:lastIndex];
-            [path insertNode:firstHolder atIndex:firstIndex];
+            if (!crossesBounds) {
+                // Insert nodes at front and back of selection
+                // Add last node THEN first node so the index remains the same
+                [path insertNode:lastHolder atIndex:lastIndex];
+                [path insertNode:firstHolder atIndex:firstIndex];
 
-            [[path nodeAtIndex:firstIndex] setConnection:SHARP];
-            [[path nodeAtIndex:firstIndex + 1] setConnection:SHARP];
-            [[path nodeAtIndex:firstIndex + 1] setType:LINE];
+                [[path nodeAtIndex:firstIndex] setConnection:SHARP];
+                [[path nodeAtIndex:firstIndex + 1] setConnection:SHARP];
+                [[path nodeAtIndex:firstIndex + 1] setType:LINE];
 
-            [[path nodeAtIndex:lastIndex] setConnection:SHARP];
-            [[path nodeAtIndex:lastIndex + 1] setConnection:SHARP];
-            [[path nodeAtIndex:lastIndex + 1] setType:LINE];
+                [[path nodeAtIndex:lastIndex] setConnection:SHARP];
+                [[path nodeAtIndex:lastIndex + 1] setConnection:SHARP];
+                [[path nodeAtIndex:lastIndex + 1] setType:LINE];
+            } else {
+                [path insertNode:firstHolder atIndex:firstIndex];
+                [path insertNode:lastHolder atIndex:lastIndex];
+
+                [[path nodeAtIndex:firstIndex + 1] setConnection:SHARP];
+                [[path nodeAtIndex:firstIndex + 2] setConnection:SHARP];
+                [[path nodeAtIndex:firstIndex + 2] setType:LINE];
+
+                [[path nodeAtIndex:lastIndex - 1] setConnection:SHARP];
+                [[path nodeAtIndex:lastIndex] setConnection:SHARP];
+                [[path nodeAtIndex:lastIndex] setType:LINE];
+            }
         }
     }
 
