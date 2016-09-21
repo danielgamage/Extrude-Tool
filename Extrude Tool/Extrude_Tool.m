@@ -47,39 +47,6 @@
 	return @"x";
 }
 
-- (NSInteger)tempTrigger {
-	// Return a modifierMask (e.g NSAlternateKeyMask, NSCommandKeyMask ...)
-	return 0;
-}
-
-- (BOOL)willSelectTempTool:(id)tempTool {
-	// This is called when the user presses a modifier key (e.g. the cmd key to swith to the Select Tool).
-	// Return NO to prevent the tool switching.
-	return YES;
-}
-
-- (void)keyDown:(NSEvent *)theEvent {
-	// Called when a key is pressed while the tool is active.
-	NSLog(@"keyDown: %@", theEvent);
-}
-
-- (void)doCommandBySelector:(SEL)aSelector {
-	NSLog(@"aSelector: %s", sel_getName(aSelector));
-}
-
-- (NSMenu *)defaultContextMenu {
-	// Adds items to the context menu.
-	NSMenu *theMenu = [[NSMenu alloc] initWithTitle:@"Contextual Menu"];
-//	[theMenu addItemWithTitle:@"Foo" action:@selector(foo:) keyEquivalent:@""];
-//	[theMenu addItemWithTitle:@"Bar" action:@selector(bar:) keyEquivalent:@""];
-	return theMenu;
-}
-
-- (void)addMenuItemsForEvent:(NSEvent *)theEvent toMenu:(NSMenu *)theMenu {
-	// Adds an item to theMenu for theEvent.
-	[theMenu insertItemWithTitle:@"Wail" action:@selector(wail:) keyEquivalent:@"" atIndex:[theMenu numberOfItems] - 1];
-}
-
 - (NSPoint)translatePoint:(CGPoint)node withDistance:(double)distance {
     NSPoint newPoint = NSMakePoint(node.x + distance * cos(extrudeAngle), node.y + distance * sin(extrudeAngle));
     return newPoint;
