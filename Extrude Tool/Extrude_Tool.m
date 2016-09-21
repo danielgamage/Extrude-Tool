@@ -55,14 +55,16 @@
 - (void)mouseDragged:(NSEvent *)theEvent {
     // Called when the mouse is moved with the primary button down.
 
+    layer = [_editViewController.graphicView activeLayer];
+
     NSPoint Loc = [_editViewController.graphicView getActiveLocation:theEvent];
-    if (!_dragging) {
-        // this is called the first time the user draggs. Otherwise it would insert the extra nodes if the user only clicks.
+
+    if (!_dragging && layer.selection.count) {
+        // Run the first time the user draggs. Otherwise it would insert the extra nodes if the user only clicks.
+        // layer.selection.count: Ensure there is a selection before running operations on the selection
         self.dragging = YES;
         _editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
         _draggStart = [_editViewController.graphicView getActiveLocation:theEvent];
-
-        layer = [_editViewController.graphicView activeLayer];
 
         sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
             NSUInteger first = [layer indexOfPath:a.parent];
@@ -115,7 +117,7 @@
         }
     }
 
-    if (canExtrude == YES) {
+    if (canExtrude == YES && layer.selection.count) {
 
         // Use mouse position on x axis to translate the points
         // ... should factor in zoom level and translate proportionally
@@ -135,8 +137,8 @@
 
 - (void)mouseUp:(NSEvent *)theEvent {
     // Called when the primary mouse button is released.
-    if (canExtrude == YES) {
 
+    if (canExtrude == YES && layer.selection.count) {
         if (_dragging) {
             NSInteger index = 0;
             for (GSNode *node in sortedSelection) {
@@ -147,12 +149,11 @@
                 index++;
             }
         }
+        // empty coordinate cache
+        [sortedSelectionCoords removeAllObjects];
     }
 
     self.dragging = NO;
-
-    // empty coordinate cache
-    [sortedSelectionCoords removeAllObjects];
 }
 
 - (void)drawBackground {
