@@ -118,31 +118,21 @@
         }
 
         if (canExtrude == YES) {
-            if (!crossesBounds) {
-                // Insert nodes at front and back of selection
-                // Add last node THEN first node so the index remains the same
-                [path insertNode:lastHolder atIndex:lastIndex];
-                [path insertNode:firstHolder atIndex:firstIndex];
+            int offset = crossesBounds ? 1 : 0;
 
-                [[path nodeAtIndex:firstIndex] setConnection:SHARP];
-                [[path nodeAtIndex:firstIndex + 1] setConnection:SHARP];
-                [[path nodeAtIndex:firstIndex + 1] setType:LINE];
+            // Insert nodes at front and back of selection
+            // shift the last index +1 because a node was inserted before it,
+            // or don't if the selection crosses bounds (the first / last nodes are effectively flipped)
+            [path insertNode:firstHolder atIndex:firstIndex];
+            [path insertNode:lastHolder atIndex:lastIndex + 1 - offset];
 
-                [[path nodeAtIndex:lastIndex] setConnection:SHARP];
-                [[path nodeAtIndex:lastIndex + 1] setConnection:SHARP];
-                [[path nodeAtIndex:lastIndex + 1] setType:LINE];
-            } else {
-                [path insertNode:firstHolder atIndex:firstIndex];
-                [path insertNode:lastHolder atIndex:lastIndex];
+            [[path nodeAtIndex:firstIndex + offset] setConnection:SHARP];
+            [[path nodeAtIndex:firstIndex + offset + 1] setConnection:SHARP];
+            [[path nodeAtIndex:firstIndex + offset + 1] setType:LINE];
 
-                [[path nodeAtIndex:firstIndex + 1] setConnection:SHARP];
-                [[path nodeAtIndex:firstIndex + 2] setConnection:SHARP];
-                [[path nodeAtIndex:firstIndex + 2] setType:LINE];
-
-                [[path nodeAtIndex:lastIndex - 1] setConnection:SHARP];
-                [[path nodeAtIndex:lastIndex] setConnection:SHARP];
-                [[path nodeAtIndex:lastIndex] setType:LINE];
-            }
+            [[path nodeAtIndex:lastIndex - offset] setConnection:SHARP];
+            [[path nodeAtIndex:lastIndex - offset + 1] setConnection:SHARP];
+            [[path nodeAtIndex:lastIndex - offset + 1] setType:LINE];
         }
     }
 
