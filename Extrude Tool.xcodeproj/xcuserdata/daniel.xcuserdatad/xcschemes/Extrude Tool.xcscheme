@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6579EC701D8BC0E400E662D1"
-               BuildableName = "Extrude Tool.glyphsTool"
+               BuildableName = "ExtrudeTool.glyphsTool"
                BlueprintName = "Extrude Tool"
                ReferencedContainer = "container:Extrude Tool.xcodeproj">
             </BuildableReference>
@@ -46,7 +46,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6579EC701D8BC0E400E662D1"
-            BuildableName = "Extrude Tool.glyphsTool"
+            BuildableName = "ExtrudeTool.glyphsTool"
             BlueprintName = "Extrude Tool"
             ReferencedContainer = "container:Extrude Tool.xcodeproj">
          </BuildableReference>
@@ -64,7 +64,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6579EC701D8BC0E400E662D1"
-            BuildableName = "Extrude Tool.glyphsTool"
+            BuildableName = "ExtrudeTool.glyphsTool"
             BlueprintName = "Extrude Tool"
             ReferencedContainer = "container:Extrude Tool.xcodeproj">
          </BuildableReference>
