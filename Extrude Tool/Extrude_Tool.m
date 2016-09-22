@@ -52,6 +52,16 @@
     return newPoint;
 }
 
+- (bool)validSelection:(NSMutableOrderedSet *)selection {
+    if (selection.count) {
+        GSNode *node = selection[0];
+        GSPath *path = node.parent;
+        return (path.nodes.count != selection.count);
+    } else {
+        return NO;
+    }
+}
+
 - (void)mouseDragged:(NSEvent *)theEvent {
     // Called when the mouse is moved with the primary button down.
 
@@ -59,107 +69,107 @@
 
     NSPoint Loc = [_editViewController.graphicView getActiveLocation:theEvent];
 
-    if (!_dragging && layer.selection.count) {
-        // Run the first time the user draggs. Otherwise it would insert the extra nodes if the user only clicks.
-        // layer.selection.count: Ensure there is a selection before running operations on the selection
-        self.dragging = YES;
-        _editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
-        _draggStart = [_editViewController.graphicView getActiveLocation:theEvent];
+    if ([self validSelection:layer.selection]) {
+        if (!_dragging) {
+            // Run the first time the user draggs. Otherwise it would insert the extra nodes if the user only clicks.
+            // layer.selection.count: Ensure there is a selection before running operations on the selection
+            self.dragging = YES;
+            _editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
+            _draggStart = [_editViewController.graphicView getActiveLocation:theEvent];
 
-        sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
-            // Sort by path parent
-            NSUInteger first = [layer indexOfPath:a.parent];
-            NSUInteger second = [layer indexOfPath:b.parent];
-            if (first > second) { return NSOrderedDescending; }
-            if (first < second) { return NSOrderedAscending; }
+            sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
+                // Sort by path parent
+                NSUInteger first = [layer indexOfPath:a.parent];
+                NSUInteger second = [layer indexOfPath:b.parent];
+                if (first > second) { return NSOrderedDescending; }
+                if (first < second) { return NSOrderedAscending; }
 
-            // Then sort by node index
-            first = [a.parent indexOfNode:a];
-            second = [b.parent indexOfNode:b];
-            if (first > second) { return NSOrderedDescending; }
-            if (first < second) { return NSOrderedAscending; }
-            return NSOrderedSame;
-        }];
+                // Then sort by node index
+                first = [a.parent indexOfNode:a];
+                second = [b.parent indexOfNode:b];
+                if (first > second) { return NSOrderedDescending; }
+                if (first < second) { return NSOrderedAscending; }
+                return NSOrderedSame;
+            }];
 
-        for (GSNode *node in sortedSelection) {
-            [sortedSelectionCoords addObject:[NSValue valueWithPoint:node.positionPrecise]];
-        }
+            for (GSNode *node in sortedSelection) {
+                [sortedSelectionCoords addObject:[NSValue valueWithPoint:node.positionPrecise]];
+            }
 
+            GSNode *firstNode = sortedSelection[0];
+            GSNode *lastNode = [sortedSelection lastObject];
+            GSPath *path = firstNode.parent;
 
-        GSNode *firstNode = sortedSelection[0];
-        GSNode *lastNode = [sortedSelection lastObject];
-        GSPath *path = firstNode.parent;
+            // If first & last nodes are selected, the selection crosses bounds of the array
+            if ([sortedSelection containsObject:[path.nodes firstObject]] && [sortedSelection containsObject:[path.nodes lastObject]]) {
+                crossesBounds = YES;
 
-        // If first & last nodes are selected, the selection crosses bounds of the array
-        if ([sortedSelection containsObject:[path.nodes firstObject]] && [sortedSelection containsObject:[path.nodes lastObject]]) {
-            crossesBounds = YES;
+                // Reassign first and last nodes accordingly
+                for (NSUInteger i=0; [sortedSelection containsObject:path.nodes[i]]; i++) {
+                    lastNode = path.nodes[i]; }
+                for (NSUInteger d=path.nodes.count - 1; [sortedSelection containsObject:path.nodes[d]]; d--) {
+                    firstNode = path.nodes[d]; }
+            } else {
+                crossesBounds = NO;
+            }
 
-            // Reassign first and last nodes accordingly
-            for (NSUInteger i=0; [sortedSelection containsObject:path.nodes[i]]; i++) {
-                lastNode = path.nodes[i]; }
-            for (NSUInteger d=path.nodes.count - 1; [sortedSelection containsObject:path.nodes[d]]; d--) {
-                firstNode = path.nodes[d]; }
-        } else {
-            crossesBounds = NO;
-        }
+            extrudeAngle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2;
 
-        extrudeAngle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2;
+            NSInteger firstIndex = [path indexOfNode:firstNode];
+            NSInteger lastIndex = [path indexOfNode:lastNode] + 1;
+            GSNode *firstHolder = [firstNode copy];
+            GSNode *lastHolder = [lastNode copy];
 
-        NSInteger firstIndex = [path indexOfNode:firstNode];
-        NSInteger lastIndex = [path indexOfNode:lastNode] + 1;
-        GSNode *firstHolder = [firstNode copy];
-        GSNode *lastHolder = [lastNode copy];
+            // Disallow Extrusion if first and last nodes in selection are OFFCURVE
+            if ([path nodeAtIndex:firstIndex].type != OFFCURVE && [path nodeAtIndex:lastIndex - 1].type != OFFCURVE) {
+                canExtrude = YES;
+            } else {
+                canExtrude = NO;
+            }
 
-        // Disallow Extrusion if first and last nodes in selection are OFFCURVE
-        if ([path nodeAtIndex:firstIndex].type != OFFCURVE && [path nodeAtIndex:lastIndex - 1].type != OFFCURVE) {
-            canExtrude = YES;
-        } else {
-            canExtrude = NO;
+            if (canExtrude == YES) {
+                int offset = crossesBounds ? 1 : 0;
+
+                // Insert nodes at front and back of selection
+                // shift the last index +1 because a node was inserted before it,
+                // or don't if the selection crosses bounds (the first / last nodes are effectively flipped)
+                [path insertNode:firstHolder atIndex:firstIndex];
+                [path insertNode:lastHolder atIndex:lastIndex + 1 - offset];
+
+                [[path nodeAtIndex:firstIndex + offset] setConnection:SHARP];
+                [[path nodeAtIndex:firstIndex + offset + 1] setConnection:SHARP];
+                [[path nodeAtIndex:firstIndex + offset + 1] setType:LINE];
+
+                [[path nodeAtIndex:lastIndex - offset] setConnection:SHARP];
+                [[path nodeAtIndex:lastIndex - offset + 1] setConnection:SHARP];
+                [[path nodeAtIndex:lastIndex - offset + 1] setType:LINE];
+            }
         }
 
         if (canExtrude == YES) {
-            int offset = crossesBounds ? 1 : 0;
 
-            // Insert nodes at front and back of selection
-            // shift the last index +1 because a node was inserted before it,
-            // or don't if the selection crosses bounds (the first / last nodes are effectively flipped)
-            [path insertNode:firstHolder atIndex:firstIndex];
-            [path insertNode:lastHolder atIndex:lastIndex + 1 - offset];
+            // Use mouse position on x axis to translate the points
+            // ... should factor in zoom level and translate proportionally
+            double distance = Loc.x - _draggStart.x;
 
-            [[path nodeAtIndex:firstIndex + offset] setConnection:SHARP];
-            [[path nodeAtIndex:firstIndex + offset + 1] setConnection:SHARP];
-            [[path nodeAtIndex:firstIndex + offset + 1] setType:LINE];
-
-            [[path nodeAtIndex:lastIndex - offset] setConnection:SHARP];
-            [[path nodeAtIndex:lastIndex - offset + 1] setConnection:SHARP];
-            [[path nodeAtIndex:lastIndex - offset + 1] setType:LINE];
+            NSInteger index = 0;
+            for (GSNode *node in sortedSelection) {
+                CGPoint origin = [sortedSelectionCoords[index] pointValue];
+                NSPoint newPoint = [self translatePoint:origin withDistance:distance];
+                // setPositionFast so not EVERY update is logged in history.
+                // force paint in elementDidChange because setPositionFast doesn't notify
+                [node setPositionFast:newPoint];
+                [layer elementDidChange:node];
+                index++;
+            }
         }
     }
-
-    if (canExtrude == YES && layer.selection.count) {
-
-        // Use mouse position on x axis to translate the points
-        // ... should factor in zoom level and translate proportionally
-        double distance = Loc.x - _draggStart.x;
-
-        NSInteger index = 0;
-        for (GSNode *node in sortedSelection) {
-            CGPoint origin = [sortedSelectionCoords[index] pointValue];
-            NSPoint newPoint = [self translatePoint:origin withDistance:distance];
-            // setPositionFast so not EVERY update is logged in history.
-            // force paint in elementDidChange because setPositionFast doesn't notify
-            [node setPositionFast:newPoint];
-            [layer elementDidChange:node];
-            index++;
-        }
-    }
-
 }
 
 - (void)mouseUp:(NSEvent *)theEvent {
     // Called when the primary mouse button is released.
 
-    if (canExtrude == YES && layer.selection.count) {
+    if (canExtrude == YES && [self validSelection:layer.selection]) {
         if (_dragging) {
             NSInteger index = 0;
             for (GSNode *node in sortedSelection) {
