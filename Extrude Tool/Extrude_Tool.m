@@ -67,7 +67,7 @@
 
     layer = [_editViewController.graphicView activeLayer];
 
-    NSPoint Loc = [_editViewController.graphicView getActiveLocation:theEvent];
+    mousePosition = [_editViewController.graphicView getActiveLocation:theEvent];
 
     if ([self validSelection:layer.selection]) {
         if (!_dragging) {
@@ -95,6 +95,8 @@
             for (GSNode *node in sortedSelection) {
                 [sortedSelectionCoords addObject:[NSValue valueWithPoint:node.positionPrecise]];
             }
+
+            bgPath = [layer bezierPath];
 
             GSNode *firstNode = sortedSelection[0];
             GSNode *lastNode = [sortedSelection lastObject];
@@ -150,7 +152,7 @@
 
             // Use mouse position on x axis to translate the points
             // ... should factor in zoom level and translate proportionally
-            double distance = Loc.x - _draggStart.x;
+            double distance = mousePosition.x - _draggStart.x;
 
             NSInteger index = 0;
             for (GSNode *node in sortedSelection) {
@@ -183,6 +185,7 @@
         }
         // empty coordinate cache
         [sortedSelectionCoords removeAllObjects];
+        bgPath = NULL;
     }
 
     self.dragging = NO;
@@ -190,6 +193,16 @@
 
 - (void)drawBackground {
     // Draw in the background, concerns the complete view.
+   if (bgPath) {
+       NSRect bounds = [layer bounds];
+       NSLog(@"%@", CGRectCreateDictionaryRepresentation(bounds));
+       NSRect pathBounds = [bgPath bounds];
+       NSLog(@"%@", CGRectCreateDictionaryRepresentation(pathBounds));
+
+       [[NSColor lightGrayColor] set];
+       [bgPath setLineWidth: 1];
+       [bgPath stroke];
+   }
 }
 
 - (void)drawForeground {

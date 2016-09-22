@@ -18,6 +18,8 @@
     double extrudeAngle;
     BOOL canExtrude;
     BOOL crossesBounds;
+    NSPoint mousePosition;
+    NSBezierPath *bgPath;
     GSLayer *layer;
     NSArray *sortedSelection;
     NSMutableArray *sortedSelectionCoords;
