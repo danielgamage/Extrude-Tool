@@ -249,6 +249,7 @@
 		6579EC871D8BC0E400E662D1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEPLOYMENT_LOCATION = YES;
 				DEVELOPMENT_TEAM = R466WB565R;
@@ -256,9 +257,10 @@
 				FRAMEWORK_SEARCH_PATHS = "$(SYSTEM_APPS_DIR)/Glyphs.app/Contents/Frameworks";
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
-				PRODUCT_BUNDLE_IDENTIFIER = "danielgamage.Extrude-Tool";
+				PRODUCT_BUNDLE_IDENTIFIER = com.danielgamage.ExtrudeTool;
 				PRODUCT_NAME = ExtrudeTool;
 				SKIP_INSTALL = YES;
+				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = glyphsTool;
 			};
 			name = Debug;
@@ -266,14 +268,16 @@
 		6579EC881D8BC0E400E662D1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = R466WB565R;
 				FRAMEWORK_SEARCH_PATHS = "$(SYSTEM_APPS_DIR)/Glyphs.app/Contents/Frameworks";
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
-				PRODUCT_BUNDLE_IDENTIFIER = "danielgamage.Extrude-Tool";
+				PRODUCT_BUNDLE_IDENTIFIER = com.danielgamage.ExtrudeTool;
 				PRODUCT_NAME = ExtrudeTool;
 				SKIP_INSTALL = NO;
+				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = glyphsTool;
 			};
 			name = Release;
