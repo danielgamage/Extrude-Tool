@@ -77,6 +77,9 @@
             _editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
             _draggStart = [_editViewController.graphicView getActiveLocation:theEvent];
 
+            // Set background before manipulating activeLayer
+            _editViewController.shadowLayer = [layer copy];
+
             sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
                 // Sort by path parent
                 NSUInteger first = [layer indexOfPath:a.parent];
@@ -95,8 +98,6 @@
             for (GSNode *node in sortedSelection) {
                 [sortedSelectionCoords addObject:[NSValue valueWithPoint:node.positionPrecise]];
             }
-
-            bgPath = [layer bezierPath];
 
             GSNode *firstNode = sortedSelection[0];
             GSNode *lastNode = [sortedSelection lastObject];
@@ -183,26 +184,12 @@
                 index++;
             }
         }
-        // empty coordinate cache
+        // Empty coordinate cache
         [sortedSelectionCoords removeAllObjects];
-        bgPath = NULL;
+        // Remove background contents
+        _editViewController.shadowLayer = NULL;
     }
-
     self.dragging = NO;
-}
-
-- (void)drawBackground {
-    // Draw in the background, concerns the complete view.
-   if (bgPath) {
-       NSRect bounds = [layer bounds];
-       NSLog(@"%@", CGRectCreateDictionaryRepresentation(bounds));
-       NSRect pathBounds = [bgPath bounds];
-       NSLog(@"%@", CGRectCreateDictionaryRepresentation(pathBounds));
-
-       [[NSColor lightGrayColor] set];
-       [bgPath setLineWidth: 1];
-       [bgPath stroke];
-   }
 }
 
 - (void)drawForeground {
