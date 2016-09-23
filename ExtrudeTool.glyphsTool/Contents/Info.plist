@@ -4,16 +4,18 @@
 <dict>
 	<key>BuildMachineOSBuild</key>
 	<string>15G1004</string>
+	<key>CFBundleDisplayName</key>
+	<string>ExtrudeTool</string>
 	<key>CFBundleIdentifier</key>
 	<string>"com.danielgamage.ExtrudeTool"</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.3.1</string>
+	<string>0.3.2</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>MacOSX</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>4</string>
+	<string>5</string>
 	<key>DTCompiler</key>
 	<string>com.apple.compilers.llvm.clang.1_0</string>
 	<key>DTPlatformBuild</key>
