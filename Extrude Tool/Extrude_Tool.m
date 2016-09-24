@@ -116,6 +116,10 @@
                 crossesBounds = NO;
             }
 
+            // Get midpoint between first and last nodes
+            midpoint = NSMakePoint(((lastNode.position.x + firstNode.position.x) / 2), ((lastNode.position.y + firstNode.position.y) / 2));
+
+            // Get angle at which to extrude
             extrudeAngle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2;
 
             NSInteger firstIndex = [path indexOfNode:firstNode];
@@ -147,13 +151,14 @@
                 [[path nodeAtIndex:lastIndex - offset + 1] setConnection:SHARP];
                 [[path nodeAtIndex:lastIndex - offset + 1] setType:LINE];
             }
+
         }
 
         if (canExtrude == YES) {
 
             // Use mouse position on x axis to translate the points
             // ... should factor in zoom level and translate proportionally
-            double distance = mousePosition.x - _draggStart.x;
+            distance = mousePosition.x - _draggStart.x;
 
             NSInteger index = 0;
             for (GSNode *node in sortedSelection) {
@@ -194,6 +199,37 @@
 
 - (void)drawForeground {
     // Draw in the foreground, concerns the complete view.
+
+    // Adapted from https://github.com/Mark2Mark/Show-Distance-And-Angle-Of-Nodes
+
+    if (_dragging) {
+        float scale = [_editViewController.graphicView scale];
+
+        NSPoint midpointWithDistance = [self translatePoint:midpoint withDistance:distance];
+        NSPoint midpointTranslated = NSMakePoint(((midpointWithDistance.x) / scale), ((midpointWithDistance.y - 700) / scale));
+
+        NSDictionary *textAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont labelFontOfSize:10], NSFontAttributeName,[NSColor whiteColor], NSForegroundColorAttributeName, nil];
+        NSString *line1 = [NSString stringWithFormat:@"%.2f", distance];
+        NSString *line2 = [NSString stringWithFormat:@"%.2f°", extrudeAngle * 180 / M_PI ];
+        NSString *text = [NSString stringWithFormat:@"%@\n%@", line1, line2];
+        NSAttributedString *displayText = [[NSAttributedString alloc] initWithString:text attributes:textAttributes];
+        // Get greater of the two line lengths and call that the actual length
+        int textLength = MAX((int)[line1 length], (int)[line2 length]);
+
+        // Draw rectangle bg
+        NSBezierPath *myPath = [[NSBezierPath alloc] init];
+        [[NSColor colorWithCalibratedRed:0 green:.6 blue:1 alpha:0.75] set];
+        NSRect dirtyRect = NSMakeRect(midpointTranslated.x, midpointTranslated.y, textLength * 10 - 10, 30);
+        [myPath appendBezierPathWithRoundedRect:dirtyRect xRadius: 8 yRadius: 8];
+        [myPath appendBezierPath:myPath];
+        [myPath fill];
+        
+
+
+        // Draw text
+        [displayText drawAtPoint:midpointTranslated];
+    }
+
 }
 
 - (void)drawLayer:(GSLayer *)Layer atPoint:(NSPoint)aPoint asActive:(BOOL)Active attributes:(NSDictionary *)Attributes {

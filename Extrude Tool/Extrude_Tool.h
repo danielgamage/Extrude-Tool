@@ -16,9 +16,11 @@
 
 @interface Extrude_Tool : GlyphsPathPlugin {
     double extrudeAngle;
+    double distance;
     BOOL canExtrude;
     BOOL crossesBounds;
     NSPoint mousePosition;
+    NSPoint midpoint;
     NSBezierPath *bgPath;
     GSLayer *layer;
     NSArray *sortedSelection;
