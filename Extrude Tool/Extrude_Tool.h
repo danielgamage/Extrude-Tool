@@ -19,6 +19,7 @@
     double distance;
     BOOL canExtrude;
     BOOL crossesBounds;
+    BOOL hudActive;
     NSPoint mousePosition;
     NSPoint midpoint;
     NSBezierPath *bgPath;
