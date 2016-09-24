@@ -205,29 +205,36 @@
     if (_dragging) {
         float scale = [_editViewController.graphicView scale];
 
+        // Translate & scale midpoint
         NSPoint midpointWithDistance = [self translatePoint:midpoint withDistance:distance];
-        NSPoint midpointTranslated = NSMakePoint(((midpointWithDistance.x) / scale), ((midpointWithDistance.y - 700) / scale));
+        NSPoint midpointTranslated = NSMakePoint(((midpointWithDistance.x) * scale), ((midpointWithDistance.y - layer.glyphMetrics.ascender) * scale));
 
+        // Define text
         NSDictionary *textAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont labelFontOfSize:10], NSFontAttributeName,[NSColor whiteColor], NSForegroundColorAttributeName, nil];
         NSString *line1 = [NSString stringWithFormat:@"%.2f", distance];
         NSString *line2 = [NSString stringWithFormat:@"%.2f°", extrudeAngle * 180 / M_PI ];
         NSString *text = [NSString stringWithFormat:@"%@\n%@", line1, line2];
         NSAttributedString *displayText = [[NSAttributedString alloc] initWithString:text attributes:textAttributes];
-        // Get greater of the two line lengths and call that the actual length
+        // Get greater of the two line letter-counts
         int textLength = MAX((int)[line1 length], (int)[line2 length]);
+
+        int rectWidth = textLength * 10 - 10;
+        int rectHeight = 40;
+
+        NSPoint midpointAdjusted = NSMakePoint(midpointTranslated.x - rectWidth / 2, midpointTranslated.y - rectHeight / 2);
 
         // Draw rectangle bg
         NSBezierPath *myPath = [[NSBezierPath alloc] init];
         [[NSColor colorWithCalibratedRed:0 green:.6 blue:1 alpha:0.75] set];
-        NSRect dirtyRect = NSMakeRect(midpointTranslated.x, midpointTranslated.y, textLength * 10 - 10, 30);
+        NSRect dirtyRect = NSMakeRect(midpointAdjusted.x, midpointAdjusted.y, rectWidth, rectHeight);
         [myPath appendBezierPathWithRoundedRect:dirtyRect xRadius: 8 yRadius: 8];
         [myPath appendBezierPath:myPath];
         [myPath fill];
-        
+
 
 
         // Draw text
-        [displayText drawAtPoint:midpointTranslated];
+        [displayText drawAtPoint:NSMakePoint(midpointAdjusted.x + 8, midpointAdjusted.y + 6)];
     }
 
 }
