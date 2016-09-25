@@ -18,6 +18,7 @@
         _toolBarIcon = [[NSImage alloc] initWithContentsOfFile:[thisBundle pathForImageResource:@"ToolbarIconTemplate"]];
         [_toolBarIcon setTemplate:YES];
     }
+    extrudeInfo = YES;
     canExtrude = NO;
     self.dragging = NO;
     extrudeAngle = 0;
