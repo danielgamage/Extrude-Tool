@@ -48,14 +48,18 @@
 }
 
 - (void)toggleHUD {
-    hudActive = hudActive ? NO : YES;
-    NSLog(@"%hhd", hudActive);
+    extrudeInfo = extrudeInfo ? NO : YES;
 }
 
 - (void)addMenuItemsForEvent:(NSEvent *)theEvent toMenu:(NSMenu *)theMenu {
     // Adds an item to theMenu for theEvent.
-    SEL toggleHUD = NSSelectorFromString(@"toggleHUD");
-    [theMenu insertItemWithTitle:@"Toggle HUD" action:@selector(toggleHUD) keyEquivalent:@"" atIndex:[theMenu numberOfItems] - 1];
+    NSMenuItem *extrudeMenuItem = [[NSMenuItem alloc] initWithTitle:@"Extrude Info" action:@selector(toggleHUD) keyEquivalent:@""];
+    if (extrudeInfo) {
+        [extrudeMenuItem setState:NSOnState];
+    } else {
+        [extrudeMenuItem setState:NSOffState];
+    }
+    [theMenu addItem:extrudeMenuItem];
 }
 
 - (NSPoint)translatePoint:(CGPoint)node withDistance:(double)distance {
@@ -212,7 +216,7 @@
     // Draw in the foreground, concerns the complete view.
 
     // Only show if option to show Extrude HUD is checked
-    if (_dragging && hudActive) {
+    if (_dragging && extrudeInfo) {
         // Adapted from https://github.com/Mark2Mark/Show-Distance-And-Angle-Of-Nodes
         float scale = [_editViewController.graphicView scale];
 
