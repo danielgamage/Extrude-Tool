@@ -15,10 +15,10 @@ Download _ExtrudeTool_ via the Glyphs [Plugin Manager](https://github.com/schrif
 1. Restart glyphs
 
 ## Usage
-Using the Select tool, select a group of connected nodes, switch to the Extrude tool in the top menu (`x` on the keyboard), click, and drag the cursor to the left or right to extrude the nodes inward or outward. The angle at which the nodes are extruded is equal to the angle of the perpendicular of the line that connects the first and last nodes in a selection.
+Using the Select tool, select a group of connected nodes, switch to the Extrude tool in the top menu (`w` on the keyboard), click, and drag the cursor to the left or right to extrude the nodes inward or outward. The angle at which the nodes are extruded is equal to the angle of the perpendicular of the line that connects the first and last nodes in a selection.
 
 ### Extrude Info
-By default, the tool will show an overlay with the distance extruded and the angle of the extrusion. If this intereferes with your work, you can turn it off by right-clicking when the Extrude tool is selected, and toggle "Extrude Info" at the bottom of the contextual menu.
+By default, the tool will show an overlay with the distance extruded and the angle of the extrusion. If this interferes with your work, you can turn it off by right-clicking when the Extrude tool is selected, and toggle "Extrude Info" at the bottom of the contextual menu.
 
 | With info | Contextual Menu | Without info |
 | --- | --- | --- |
