@@ -3,19 +3,19 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>15G1004</string>
+	<string>16A323</string>
 	<key>CFBundleDisplayName</key>
 	<string>ExtrudeTool</string>
 	<key>CFBundleIdentifier</key>
 	<string>"com.danielgamage.ExtrudeTool"</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.4.1</string>
+	<string>0.4.2</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>MacOSX</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>7</string>
+	<string>8</string>
 	<key>DTCompiler</key>
 	<string>com.apple.compilers.llvm.clang.1_0</string>
 	<key>DTPlatformBuild</key>

@@ -45,7 +45,7 @@
 - (NSString *)trigger {
     // Return the key that the user can press to activate the tool.
     // Please make sure to not conflict with other tools.
-    return @"x";
+    return @"w";
 }
 
 - (void)toggleHUD {
