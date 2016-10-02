@@ -7,15 +7,15 @@
 	<key>CFBundleDisplayName</key>
 	<string>ExtrudeTool</string>
 	<key>CFBundleIdentifier</key>
-	<string>"com.danielgamage.ExtrudeTool"</string>
+	<string>com.danielgamage.ExtrudeTool</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.4.2</string>
+	<string>0.4.3</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>MacOSX</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>8</string>
+	<string>9</string>
 	<key>DTCompiler</key>
 	<string>com.apple.compilers.llvm.clang.1_0</string>
 	<key>DTPlatformBuild</key>

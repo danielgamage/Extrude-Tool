@@ -90,7 +90,6 @@
             // Run the first time the user draggs. Otherwise it would insert the extra nodes if the user only clicks.
             // layer.selection.count: Ensure there is a selection before running operations on the selection
             self.dragging = YES;
-            _editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
             _draggStart = [_editViewController.graphicView getActiveLocation:theEvent];
 
             // Set background before manipulating activeLayer
@@ -257,13 +256,12 @@
 
 - (void)drawLayer:(GSLayer *)Layer atPoint:(NSPoint)aPoint asActive:(BOOL)Active attributes:(NSDictionary *)Attributes {
     // Draw anythin for this particular layer.
-    //    [_editViewController.graphicView drawLayer:Layer atPoint:aPoint asActive:true attributes:Attributes];
     [super drawLayer:Layer atPoint:aPoint asActive:Active attributes:Attributes];
 }
 
 - (void)willActivate {
     // Called when the tool is selected by the user.
-    // editViewController.graphicView.cursor = [NSCursor openHandCursor];
+    _editViewController.graphicView.cursor = [NSCursor resizeLeftRightCursor];
 }
 
 - (void)willDeactivate {}
