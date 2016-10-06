@@ -75,7 +75,7 @@
         GSNode *node = selection[0];
         GSPath *path = node.parent;
         if (path.closed) {
-            return (path.nodes.count != selection.count);
+            return (selection.count < path.nodes.count);
         } else {
             return YES;
         }
