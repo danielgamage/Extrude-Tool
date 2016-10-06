@@ -144,6 +144,8 @@
             // Get angle at which to extrude
             extrudeAngle = atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2;
 
+            pathDirection = path.direction;
+
             NSInteger firstIndex = [path indexOfNode:firstNode];
             NSInteger lastIndex = [path indexOfNode:lastNode] + 1;
             GSNode *firstHolder = [firstNode copy];
@@ -179,8 +181,8 @@
     if (canExtrude && selectionValid) {
 
         // Use mouse position on x axis to translate the points
-        // ... should factor in zoom level and translate proportionally
-        extrudeDistance = mousePosition.x - _draggStart.x;
+        // should counter-act path direction
+        extrudeDistance = (mousePosition.x - _draggStart.x) * (pathDirection * -1);
 
         NSInteger index = 0;
         for (GSNode *node in sortedSelection) {

@@ -21,6 +21,7 @@
     BOOL selectionValid;
     BOOL crossesBounds;
     BOOL extrudeInfo;
+    GSPathDirection pathDirection;
     NSPoint mousePosition;
     NSPoint midpoint;
     NSBezierPath *bgPath;
