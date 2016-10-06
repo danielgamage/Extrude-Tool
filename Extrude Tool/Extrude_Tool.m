@@ -20,8 +20,10 @@
     }
     extrudeInfo = YES;
     canExtrude = NO;
+    selectionValid = NO;
     self.dragging = NO;
     extrudeAngle = 0;
+    extrudeDistance = 0;
     sortedSelectionCoords = [[NSMutableArray alloc] init];
 
     return self;
@@ -72,7 +74,11 @@
     if (selection.count) {
         GSNode *node = selection[0];
         GSPath *path = node.parent;
-        return (path.nodes.count != selection.count);
+        if (path.closed) {
+            return (path.nodes.count != selection.count);
+        } else {
+            return YES;
+        }
     } else {
         return NO;
     }
@@ -84,11 +90,12 @@
     layer = [_editViewController.graphicView activeLayer];
 
     mousePosition = [_editViewController.graphicView getActiveLocation:theEvent];
+    if (!_dragging) {
+        // Run the first time the user draggs. Otherwise it would insert the extra nodes if the user only clicks.
+        // layer.selection.count: Ensure there is a selection before running operations on the selection
+        selectionValid = [self validSelection:layer.selection];
 
-    if ([self validSelection:layer.selection]) {
-        if (!_dragging) {
-            // Run the first time the user draggs. Otherwise it would insert the extra nodes if the user only clicks.
-            // layer.selection.count: Ensure there is a selection before running operations on the selection
+        if (selectionValid) {
             self.dragging = YES;
             _draggStart = [_editViewController.graphicView getActiveLocation:theEvent];
 
@@ -119,7 +126,7 @@
             GSPath *path = firstNode.parent;
 
             // If first & last nodes are selected, the selection crosses bounds of the array
-            if ([sortedSelection containsObject:[path.nodes firstObject]] && [sortedSelection containsObject:[path.nodes lastObject]]) {
+            if (path.closed && [sortedSelection containsObject:[path.nodes firstObject]] && [sortedSelection containsObject:[path.nodes lastObject]]) {
                 crossesBounds = YES;
 
                 // Reassign first and last nodes accordingly
@@ -166,25 +173,24 @@
                 [[path nodeAtIndex:lastIndex - offset + 1] setConnection:SHARP];
                 [[path nodeAtIndex:lastIndex - offset + 1] setType:LINE];
             }
-
         }
+    }
 
-        if (canExtrude == YES) {
+    if (canExtrude && selectionValid) {
 
-            // Use mouse position on x axis to translate the points
-            // ... should factor in zoom level and translate proportionally
-            distance = mousePosition.x - _draggStart.x;
+        // Use mouse position on x axis to translate the points
+        // ... should factor in zoom level and translate proportionally
+        extrudeDistance = mousePosition.x - _draggStart.x;
 
-            NSInteger index = 0;
-            for (GSNode *node in sortedSelection) {
-                CGPoint origin = [sortedSelectionCoords[index] pointValue];
-                NSPoint newPoint = [self translatePoint:origin withDistance:distance];
-                // setPositionFast so not EVERY update is logged in history.
-                // force paint in elementDidChange because setPositionFast doesn't notify
-                [node setPositionFast:newPoint];
-                [layer elementDidChange:node];
-                index++;
-            }
+        NSInteger index = 0;
+        for (GSNode *node in sortedSelection) {
+            CGPoint origin = [sortedSelectionCoords[index] pointValue];
+            NSPoint newPoint = [self translatePoint:origin withDistance:extrudeDistance];
+            // setPositionFast so not EVERY update is logged in history.
+            // force paint in elementDidChange because setPositionFast doesn't notify
+            [node setPositionFast:newPoint];
+            [layer elementDidChange:node];
+            index++;
         }
     }
 }
@@ -192,7 +198,7 @@
 - (void)mouseUp:(NSEvent *)theEvent {
     // Called when the primary mouse button is released.
 
-    if (canExtrude == YES && [self validSelection:layer.selection]) {
+    if (canExtrude && selectionValid) {
         if (_dragging) {
             NSInteger index = 0;
             for (GSNode *node in sortedSelection) {
@@ -221,12 +227,12 @@
         float scale = [_editViewController.graphicView scale];
 
         // Translate & scale midpoint
-        NSPoint midpointWithDistance = [self translatePoint:midpoint withDistance:distance];
+        NSPoint midpointWithDistance = [self translatePoint:midpoint withDistance:extrudeDistance];
         NSPoint midpointTranslated = NSMakePoint(((midpointWithDistance.x) * scale), ((midpointWithDistance.y - layer.glyphMetrics.ascender) * scale));
 
         // Define text
         NSDictionary *textAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont labelFontOfSize:10], NSFontAttributeName,[NSColor whiteColor], NSForegroundColorAttributeName, nil];
-        NSString *line1 = [NSString stringWithFormat:@"%.2f", distance];
+        NSString *line1 = [NSString stringWithFormat:@"%.2f", extrudeDistance];
         NSString *line2 = [NSString stringWithFormat:@"%.2f°", extrudeAngle * 180 / M_PI ];
         NSString *text = [NSString stringWithFormat:@"%@\n%@", line1, line2];
         NSAttributedString *displayText = [[NSAttributedString alloc] initWithString:text attributes:textAttributes];
