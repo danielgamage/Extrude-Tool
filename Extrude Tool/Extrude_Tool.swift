@@ -26,9 +26,10 @@ class Extrude_Tool: GlyphsPathPlugin {
     var sortedSelectionCoords: Array<NSPoint>
     var extrudeQuantizationString: String
     var valueField: NSTextField
+    var editView: GSGlyphEditViewProtocol
 
     init() {
-//        super.init()
+        super.init()
         var thisBundle = Bundle(forClass: self)
         if thisBundle {
             // The toolbar icon:
@@ -43,6 +44,7 @@ class Extrude_Tool: GlyphsPathPlugin {
         extrudeDistance = 0
         extrudeQuantization = 0
         sortedSelectionCoords = []
+        editView = ((editViewController as! GSGlyphEditViewControllerProtocol).graphicView as! GSGlyphEditViewProtocol)
     }
 
     override func interfaceVersion() -> Int {
@@ -156,8 +158,8 @@ class Extrude_Tool: GlyphsPathPlugin {
 
     func mouseDragged(theEvent: NSEvent) {
         // Called when the mouse is moved with the primary button down.
-        layer = editViewController.graphicView.activeLayer
-        mousePosition = editViewController.graphicView.getActiveLocation(theEvent)
+        layer = editView.activeLayer
+        mousePosition = editView.getActiveLocation(theEvent)
 
         if !dragging {
             // Run the first time the user draggs. Otherwise it would insert the extra nodes if the user only clicks.
@@ -166,10 +168,10 @@ class Extrude_Tool: GlyphsPathPlugin {
 
             if selectionValid {
                 dragging = true
-                draggStart = editViewController.graphicView.getActiveLocation(theEvent)
+                draggStart = editView.getActiveLocation(theEvent)
 
                 // Set background before manipulating activeLayer
-                editViewController.shadowLayer = layer
+                (editViewController as! GSGlyphEditViewControllerProtocol).shadowLayer = layer
                 sortedSelection = layer.selection.sortedArrayUsingComparator({ (a: GSNode, b: GSNode) -> ComparisonResult in
                     // Sort by path parent
                     var first = layer.indexOfPath(a.parent)
@@ -302,7 +304,7 @@ class Extrude_Tool: GlyphsPathPlugin {
             // Empty coordinate cache
             sortedSelectionCoords.removeAll()
             // Remove background contents
-            editViewController.shadowLayer = NULL
+            editView.shadowLayer = NULL
         }
         dragging = false
     }
@@ -312,7 +314,7 @@ class Extrude_Tool: GlyphsPathPlugin {
         // Only show if option to show Extrude HUD is checked
         if (dragging && extrudeInfo) {
             // Adapted from https://github.com/Mark2Mark/Show-Distance-And-Angle-Of-Nodes
-            var scale = self.editViewController.graphicView.scale
+            var scale = editView.scale
 
             // Translate & scale midpoint
             var midpointWithDistance = translatePoint(node: midpoint, distance: extrudeDistance)
@@ -356,8 +358,7 @@ class Extrude_Tool: GlyphsPathPlugin {
 
     override func willActivate() {
         // Called when the tool is selected by the user.
-        editViewController.graphicView.cursor = NSCursor.resizeLeftRightCursor;
-        editViewController.
+        editView.cursor = NSCursor.resizeLeftRightCursor();
     }
 
     func willDeactivate() {}
