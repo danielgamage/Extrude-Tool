@@ -14,13 +14,17 @@
 		</data>
 		<key>Resources/ToolbarIconTemplate.pdf</key>
 		<data>
-		35g/HpFJ75G82S7EqS9GOMzsH/c=
+		ZHXOSRxq8dg6ZXpidj3nOX3AGYw=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
 		<key>Resources/Extrude Tool-Info.plist</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			ZpShXd85WruyHQqAvnU3etxRWXQ=
+			</data>
 			<key>hash2</key>
 			<data>
 			MoLBVGQVGJR4w4uY7/ZDrP/jWdYRB9AarshM+9oyPVg=
@@ -28,6 +32,10 @@
 		</dict>
 		<key>Resources/Extrude Tool-Prefix.pch</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+			</data>
 			<key>hash2</key>
 			<data>
 			47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
@@ -35,9 +43,13 @@
 		</dict>
 		<key>Resources/ToolbarIconTemplate.pdf</key>
 		<dict>
+			<key>hash</key>
+			<data>
+			ZHXOSRxq8dg6ZXpidj3nOX3AGYw=
+			</data>
 			<key>hash2</key>
 			<data>
-			01RRsgWOGWlJPRjWj7PCE/X2dTGinjs4YO/fjVTw4zA=
+			rvYgIeFYwcnLSC4BPi7LJiKd+f9bZeMWess7inuVVrw=
 			</data>
 		</dict>
 	</dict>

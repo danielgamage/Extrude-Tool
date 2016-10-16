@@ -266,6 +266,7 @@
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.danielgamage.ExtrudeTool;
 				PRODUCT_NAME = ExtrudeTool;
 				SKIP_INSTALL = YES;
@@ -288,6 +289,7 @@
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.danielgamage.ExtrudeTool;
 				PRODUCT_NAME = ExtrudeTool;
 				SKIP_INSTALL = NO;
