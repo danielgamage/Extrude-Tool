@@ -13,6 +13,7 @@
 		6579EC7D1D8BC0E400E662D1 /* Extrude_Tool.m in Sources */ = {isa = PBXBuildFile; fileRef = 6579EC7C1D8BC0E400E662D1 /* Extrude_Tool.m */; };
 		6579EC801D8BC0E400E662D1 /* ToolbarIconTemplate.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 6579EC7F1D8BC0E400E662D1 /* ToolbarIconTemplate.pdf */; };
 		6579EC821D8BC0E400E662D1 /* GlyphsCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6579EC811D8BC0E400E662D1 /* GlyphsCore.framework */; };
+		65A5A2A91DB33A610079DDF8 /* Extrude_Tool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65A5A2A81DB33A610079DDF8 /* Extrude_Tool.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,8 @@
 		6579EC7F1D8BC0E400E662D1 /* ToolbarIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = ToolbarIconTemplate.pdf; sourceTree = "<group>"; };
 		6579EC811D8BC0E400E662D1 /* GlyphsCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GlyphsCore.framework; path = /Applications/Glyphs.app/Contents/Frameworks/GlyphsCore.framework; sourceTree = "<absolute>"; };
 		6579EC831D8BC0E400E662D1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		65A5A2A51DB339170079DDF8 /* Extrude Tool-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Extrude Tool-Bridging-Header.h"; sourceTree = "<group>"; };
+		65A5A2A81DB33A610079DDF8 /* Extrude_Tool.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extrude_Tool.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,11 +72,13 @@
 			isa = PBXGroup;
 			children = (
 				6579EC771D8BC0E400E662D1 /* Extrude Tool-Prefix.pch */,
+				65A5A2A81DB33A610079DDF8 /* Extrude_Tool.swift */,
 				6579EC791D8BC0E400E662D1 /* Extrude Tool-Info.plist */,
 				6579EC7B1D8BC0E400E662D1 /* Extrude_Tool.h */,
 				6579EC7C1D8BC0E400E662D1 /* Extrude_Tool.m */,
 				6579EC831D8BC0E400E662D1 /* Info.plist */,
 				6579EC7E1D8BC0E400E662D1 /* Supporting Files */,
+				65A5A2A51DB339170079DDF8 /* Extrude Tool-Bridging-Header.h */,
 			);
 			path = "Extrude Tool";
 			sourceTree = "<group>";
@@ -119,6 +124,7 @@
 					6579EC701D8BC0E400E662D1 = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = R466WB565R;
+						LastSwiftMigration = 0800;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -159,6 +165,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6579EC7D1D8BC0E400E662D1 /* Extrude_Tool.m in Sources */,
+				65A5A2A91DB33A610079DDF8 /* Extrude_Tool.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +256,7 @@
 		6579EC871D8BC0E400E662D1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEPLOYMENT_LOCATION = YES;
@@ -257,9 +265,13 @@
 				FRAMEWORK_SEARCH_PATHS = "$(SYSTEM_APPS_DIR)/Glyphs.app/Contents/Frameworks";
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.danielgamage.ExtrudeTool;
 				PRODUCT_NAME = ExtrudeTool;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Extrude Tool/Extrude Tool-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = glyphsTool;
 			};
@@ -268,15 +280,19 @@
 		6579EC881D8BC0E400E662D1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = R466WB565R;
 				FRAMEWORK_SEARCH_PATHS = "$(SYSTEM_APPS_DIR)/Glyphs.app/Contents/Frameworks";
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.danielgamage.ExtrudeTool;
 				PRODUCT_NAME = ExtrudeTool;
 				SKIP_INSTALL = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "Extrude Tool/Extrude Tool-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				WRAPPER_EXTENSION = glyphsTool;
 			};
