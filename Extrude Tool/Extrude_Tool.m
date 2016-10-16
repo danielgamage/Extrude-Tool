@@ -24,6 +24,7 @@
     self.dragging = NO;
     extrudeAngle = 0;
     extrudeDistance = 0;
+    extrudeQuantization = 0;
     sortedSelectionCoords = [[NSMutableArray alloc] init];
 
     return self;
@@ -56,13 +57,66 @@
 
 - (void)addMenuItemsForEvent:(NSEvent *)theEvent toMenu:(NSMenu *)theMenu {
     // Adds an item to theMenu for theEvent.
-    NSMenuItem *extrudeMenuItem = [[NSMenuItem alloc] initWithTitle:@"Extrude Info" action:@selector(toggleHUD) keyEquivalent:@""];
-    if (extrudeInfo) {
-        [extrudeMenuItem setState:NSOnState];
-    } else {
-        [extrudeMenuItem setState:NSOffState];
-    }
-    [theMenu addItem:extrudeMenuItem];
+    NSMenuItem *extrudeInfoItem = [[NSMenuItem alloc] initWithTitle:@"Extrude Info" action:@selector(toggleHUD) keyEquivalent:@""];
+    NSMenuItem *extrudeSliderItem = [[NSMenuItem alloc] initWithTitle:@"Extrude Snapping" action:nil keyEquivalent:@""];
+
+    // Make view for Quantization slider
+    CGRect  viewRect = CGRectMake(0, 0, 196, 52);
+    NSView* sliderView = [[NSView alloc] initWithFrame:viewRect];
+    NSInteger margin = 20;
+
+    // Label above
+    CGRect labelRect = CGRectMake(margin, 22, sliderView.frame.size.width - margin, 26);
+    NSTextField *labelField = [[NSTextField alloc] initWithFrame:labelRect];
+    [labelField setStringValue:@"Extrusion Snapping"];
+    [labelField setBezeled:NO];
+    [labelField setDrawsBackground:NO];
+    [labelField setEditable:NO];
+    [labelField setSelectable:NO];
+    [labelField setTextColor:[NSColor darkGrayColor]];
+    [sliderView addSubview:labelField];
+
+    // Slider input
+    CGRect sliderRect = NSMakeRect(margin, 0, 121, 26);
+    NSSlider *slider = [[NSSlider alloc] initWithFrame:sliderRect];
+    slider.doubleValue = (double)extrudeQuantization;
+    slider.minValue = 0.00;
+    slider.maxValue = 10.00;
+    slider.action = @selector(updateQuantization:);
+    slider.continuous = YES;
+    slider.numberOfTickMarks = 11;
+    slider.allowsTickMarkValuesOnly = YES;
+    slider.target = self;
+    [sliderView addSubview:slider];
+
+    // Slider value
+    CGRect valueRect = CGRectMake(slider.frame.origin.x + slider.frame.size.width, 0, viewRect.size.width - slider.frame.origin.x - slider.frame.size.width - margin, 26);
+    valueField = [[NSTextField alloc] initWithFrame:valueRect];
+    [valueField setAlignment:NSTextAlignmentRight];
+    [valueField setStringValue:[self updateQuantizationString]];
+    [valueField setBezeled:NO];
+    [valueField setDrawsBackground:NO];
+    [valueField setEditable:NO];
+    [valueField setSelectable:NO];
+    [sliderView addSubview:valueField];
+
+    (extrudeInfo) ? [extrudeInfoItem setState:NSOnState] : [extrudeInfoItem setState:NSOffState];
+
+    [extrudeSliderItem setView: sliderView];
+
+    [theMenu addItem:[NSMenuItem separatorItem]];
+    [theMenu addItem:extrudeInfoItem];
+    [theMenu addItem:extrudeSliderItem];
+}
+
+- (void)updateQuantization:(id)sender {
+    NSSlider *slider = (NSSlider*)sender;
+    extrudeQuantization = slider.doubleValue;
+    extrudeQuantizationString = [self updateQuantizationString];
+    [valueField setStringValue:extrudeQuantizationString];
+}
+- (NSString *)updateQuantizationString {
+    return (extrudeQuantization == 0) ? @"Off" : [NSString stringWithFormat:@"%ipx", extrudeQuantization];
 }
 
 - (NSPoint)translatePoint:(CGPoint)node withDistance:(double)distance {
@@ -183,6 +237,11 @@
         // Use mouse position on x axis to translate the points
         // should counter-act path direction
         extrudeDistance = (mousePosition.x - _draggStart.x) * (pathDirection * -1);
+
+        // Quantize to nearest multiple of quantize value
+        if (extrudeQuantization != 0) {
+            extrudeDistance = round(extrudeDistance / extrudeQuantization) * extrudeQuantization;
+        }
 
         NSInteger index = 0;
         for (GSNode *node in sortedSelection) {

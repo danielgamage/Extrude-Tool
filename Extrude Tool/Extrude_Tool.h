@@ -17,6 +17,7 @@
 @interface Extrude_Tool : GlyphsPathPlugin {
     double extrudeAngle;
     double extrudeDistance;
+    int extrudeQuantization;
     BOOL canExtrude;
     BOOL selectionValid;
     BOOL crossesBounds;
@@ -28,6 +29,8 @@
     GSLayer *layer;
     NSArray *sortedSelection;
     NSMutableArray *sortedSelectionCoords;
+    NSString *extrudeQuantizationString;
+    NSTextField *valueField;
 }
 
 @end
