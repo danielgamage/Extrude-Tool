@@ -257,6 +257,7 @@
 				FRAMEWORK_SEARCH_PATHS = "$(SYSTEM_APPS_DIR)/Glyphs.app/Contents/Frameworks";
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.danielgamage.ExtrudeTool;
 				PRODUCT_NAME = ExtrudeTool;
 				SKIP_INSTALL = YES;
@@ -274,6 +275,7 @@
 				FRAMEWORK_SEARCH_PATHS = "$(SYSTEM_APPS_DIR)/Glyphs.app/Contents/Frameworks";
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.danielgamage.ExtrudeTool;
 				PRODUCT_NAME = ExtrudeTool;
 				SKIP_INSTALL = NO;
