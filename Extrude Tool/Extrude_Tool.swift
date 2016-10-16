@@ -138,8 +138,9 @@ class Extrude_Tool: GlyphsPathPlugin {
     }
 
     func translatePoint(node: CGPoint, distance: Double) -> NSPoint {
-        var newPoint = NSMakePoint(node.x + CGFloat(distance) * cos(extrudeAngle), node.y + CGFloat(distance) * sin(extrudeAngle))
-        return newPoint
+        let x = node.x + CGFloat(distance) * cos(CGFloat(extrudeAngle))
+        let y = node.y + CGFloat(distance) * sin(CGFloat(extrudeAngle))
+        return NSMakePoint(x, y)
     }
 
     func validSelection(selection: NSMutableOrderedSet) -> Bool {
@@ -158,7 +159,7 @@ class Extrude_Tool: GlyphsPathPlugin {
 
     func mouseDragged(theEvent: NSEvent) {
         // Called when the mouse is moved with the primary button down.
-        layer = editView.activeLayer
+        layer = (editViewController as! GSGlyphEditViewControllerProtocol).activeLayer
         mousePosition = editView.getActiveLocation(theEvent)
 
         if !dragging {
@@ -201,21 +202,21 @@ class Extrude_Tool: GlyphsPathPlugin {
 
                 var firstNode : GSNode = sortedSelection.first as GSNode!
                 var lastNode : GSNode = sortedSelection.last as GSNode!
-                var path = firstNode.parent
+                var path : GSPath = firstNode.parent as! GSPath!
 
                 // If first & last nodes are selected, the selection crosses bounds of the array
-                if path.closed && sortedSelection.containsObject(path.nodes.firstObject()) && sortedSelection.containsObject(path.nodes.lastObject()) {
+                if path.closed && sortedSelection.contains(path.nodes.first) && sortedSelection.contains(path.nodes.last) {
                     crossesBounds = true
 
                     // Reassign first and last nodes accordingly
                     var i = 0
-                    while sortedSelection.containsObject(path.nodes[i]) {
+                    while sortedSelection.contains(path.nodes[i]) {
                         lastNode = path.nodes[i]
                         i += 1
                     }
 
                     var d = path.nodes.count - 1;
-                    while sortedSelection.containsObject(path.nodes[d]) {
+                    while sortedSelection.contains(path.nodes[d]) {
                         firstNode = path.nodes[d]
                         d -= 1
                     }
@@ -224,12 +225,12 @@ class Extrude_Tool: GlyphsPathPlugin {
                 }
 
                 // Get midpoint between first and last nodes
-                midpoint = NSMakePoint(((lastNode!.position.x + firstNode!.position.x) / 2), ((lastNode!.position.y + firstNode!.position.y) / 2))
+                midpoint = NSMakePoint(((lastNode.position.x + firstNode.position.x) / 2), ((lastNode.position.y + firstNode.position.y) / 2))
 
                 // Get angle at which to extrude
-                extrudeAngle = atan2f(lastNode!.position.y - firstNode!.position.y, lastNode!.position.x - firstNode!.position.x) - M_PI_2
+                extrudeAngle = Double(atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2)
 
-                pathDirection = path!.direction
+                pathDirection = path!.direction as GSPathDirection
 
                 var firstIndex = path!.indexOfNode(firstNode)!
                 var lastIndex = path!.indexOfNode(lastNode)! + 1
@@ -293,8 +294,8 @@ class Extrude_Tool: GlyphsPathPlugin {
             if dragging {
                 var index = 0
                 for node: GSNode in sortedSelection {
-                    var newPos = node.positionPrecise
-                    var origin = sortedSelectionCoords[index]
+                    let newPos = node.positionPrecise
+                    let origin = sortedSelectionCoords[index]
                     // revert to origin first so that history log shows move from point@origin to point@newPos, instead of form wherever mouseDragged left off
                     node.setPositionFast(origin)
                     node.position = newPos
@@ -304,11 +305,11 @@ class Extrude_Tool: GlyphsPathPlugin {
             // Empty coordinate cache
             sortedSelectionCoords.removeAll()
             // Remove background contents
-            editView.shadowLayer = NULL
+            (editViewController as! GSGlyphEditViewControllerProtocol).shadowLayer = NULL
         }
         dragging = false
     }
-    func drawForeground() {
+    override func drawForeground() {
         // Draw in the foreground, concerns the complete view.
 
         // Only show if option to show Extrude HUD is checked
@@ -318,7 +319,7 @@ class Extrude_Tool: GlyphsPathPlugin {
 
             // Translate & scale midpoint
             var midpointWithDistance = translatePoint(node: midpoint, distance: extrudeDistance)
-            var midpointTranslated = NSMakePoint(((midpointWithDistance.x) * scale), ((midpointWithDistance.y - layer.glyphMetrics.ascender) * scale))
+            var midpointTranslated = NSMakePoint(((midpointWithDistance.x) * scale), ((midpointWithDistance.y - layer.glyphMetrics().ascender) * scale))
 
             // Define text
             var textAttributes = [
