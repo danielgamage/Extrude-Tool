@@ -30,11 +30,11 @@ class Extrude_Tool: GlyphsPathPlugin {
 
     init() {
         super.init()
-        var thisBundle = Bundle(forClass: self)
-        if thisBundle {
+        var thisBundle : Bundle? = Bundle.main
+        if thisBundle != nil {
             // The toolbar icon:
-            _toolBarIcon = NSImage(contentsOfFile: thisBundle.pathForImageResource("ToolbarIconTemplate"))
-            _toolBarIcon.setTemplate(true)
+            toolBarIcon = NSImage(contentsOfFile: thisBundle.pathForImageResource("ToolbarIconTemplate"))
+            toolBarIcon.isTemplate = true
         }
         extrudeInfo = true
         canExtrude = false
@@ -47,22 +47,22 @@ class Extrude_Tool: GlyphsPathPlugin {
         editView = ((editViewController as! GSGlyphEditViewControllerProtocol).graphicView as! GSGlyphEditViewProtocol)
     }
 
-    override func interfaceVersion() -> Int {
+    func interfaceVersion() -> Int {
         // Distinguishes the API verison the plugin was built for. Return 1.
         return 1
     }
 
-    override func groupID() -> Int {
+    func groupID() -> Int {
         // Return a number between 50 and 1000 to position the icon in the toolbar.
         return 20
     }
 
-    override func title() -> String! {
+    func title() -> String! {
         // return the name of the tool as it will appear in the tooltip of in the toolbar.
         return "Extrude"
     }
 
-    override func trigger() -> String! {
+    func trigger() -> String! {
         // Return the key that the user can press to activate the tool.
         // Please make sure to not conflict with other tools.
         return "w"
@@ -74,8 +74,8 @@ class Extrude_Tool: GlyphsPathPlugin {
 
     func addMenuItemsForEvent(theEvent: NSEvent, toMenu theMenu: NSMenu) {
         // Adds an item to theMenu for theEvent.
-        var extrudeInfoItem = NSMenuItem(title: "Extrude Info", action: #selector(Extrude_Tool.toggleHUD), keyEquivalent: "")
-        var extrudeSliderItem = NSMenuItem(title: "Extrude Snapping", action: nil, keyEquivalent: "")
+        let extrudeInfoItem = NSMenuItem(title: "Extrude Info", action: #selector(Extrude_Tool.toggleHUD), keyEquivalent: "")
+        let extrudeSliderItem = NSMenuItem(title: "Extrude Snapping", action: nil, keyEquivalent: "")
 
         // Make view for Quantization slider
         let viewRect = NSMakeRect(0, 0, 196, 52)
@@ -173,7 +173,7 @@ class Extrude_Tool: GlyphsPathPlugin {
 
                 // Set background before manipulating activeLayer
                 (editViewController as! GSGlyphEditViewControllerProtocol).shadowLayer = layer
-                sortedSelection = layer.selection.sortedArrayUsingComparator({ (a: GSNode, b: GSNode) -> ComparisonResult in
+                sortedSelection = layer.selection.sortedArray(comparator: { (a: GSNode, b: GSNode) -> ComparisonResult in
                     // Sort by path parent
                     var first = layer.indexOfPath(a.parent)
                     var second = layer.indexOfPath(b.parent)
@@ -205,7 +205,7 @@ class Extrude_Tool: GlyphsPathPlugin {
                 var path : GSPath = firstNode.parent as! GSPath!
 
                 // If first & last nodes are selected, the selection crosses bounds of the array
-                if path.closed && sortedSelection.contains(path.nodes.first) && sortedSelection.contains(path.nodes.last) {
+                if path.closed && sortedSelection.contains(path.nodes.first!) && sortedSelection.contains(path.nodes.last!) {
                     crossesBounds = true
 
                     // Reassign first and last nodes accordingly
@@ -228,17 +228,17 @@ class Extrude_Tool: GlyphsPathPlugin {
                 midpoint = NSMakePoint(((lastNode.position.x + firstNode.position.x) / 2), ((lastNode.position.y + firstNode.position.y) / 2))
 
                 // Get angle at which to extrude
-                extrudeAngle = Double(atan2f(lastNode.position.y - firstNode.position.y, lastNode.position.x - firstNode.position.x) - M_PI_2)
+                extrudeAngle = atan2(Double(lastNode.position.y - firstNode.position.y), Double(lastNode.position.x - firstNode.position.x)) - M_PI_2
 
-                pathDirection = path!.direction as GSPathDirection
+                pathDirection = path.direction() as GSPathDirection
 
-                var firstIndex = path!.indexOfNode(firstNode)!
-                var lastIndex = path!.indexOfNode(lastNode)! + 1
+                var firstIndex = Int(path.index(of: firstNode))
+                var lastIndex = Int(path.index(of: lastNode) + 1)
                 var firstHolder = firstNode
                 var lastHolder = lastNode
 
                 // Disallow Extrusion if first and last nodes in selection are OFFCURVE
-                if path.nodeAtIndex(firstIndex).type != .OFFCURVE && path.nodeAtIndex(lastIndex - 1).type != .OFFCURVE {
+                if path.node(at: firstIndex).type != .OFFCURVE && path.node(at: lastIndex - 1).type != .OFFCURVE {
                     canExtrude = true
                 } else {
                     canExtrude = false
@@ -250,16 +250,16 @@ class Extrude_Tool: GlyphsPathPlugin {
                     // Insert nodes at front and back of selection
                     // shift the last index +1 because a node was inserted before it,
                     // or don't if the selection crosses bounds (the first / last nodes are effectively flipped)
-                    path.insertNode(firstHolder, atIndex: firstIndex)
-                    path.insertNode(lastHolder, atIndex: lastIndex + 1 - offset)
+                    path.insertNode(firstHolder, at: firstIndex)
+                    path.insertNode(lastHolder, at: lastIndex + 1 - offset)
 
-                    path.nodeAtIndex(firstIndex + offset).setConnection(.SHARP)
-                    path.nodeAtIndex(firstIndex + offset + 1).setConnection(.SHARP)
-                    path.nodeAtIndex(firstIndex + offset + 1).setType(.LINE)
+                    path.node(at: firstIndex + offset).connection = .SHARP
+                    path.node(at: firstIndex + offset + 1).connection = .SHARP
+                    path.node(at: firstIndex + offset + 1).type = .LINE
 
-                    path.nodeAtIndex(lastIndex - offset).setConnection(.SHARP)
-                    path.nodeAtIndex(lastIndex - offset + 1).setConnection(.SHARP)
-                    path.nodeAtIndex(lastIndex - offset + 1).setType(.LINE)
+                    path.node(at: lastIndex - offset).connection = .SHARP
+                    path.node(at: lastIndex - offset + 1).connection = .SHARP
+                    path.node(at: lastIndex - offset + 1).type = .LINE
                 }
             }
         }
@@ -305,7 +305,7 @@ class Extrude_Tool: GlyphsPathPlugin {
             // Empty coordinate cache
             sortedSelectionCoords.removeAll()
             // Remove background contents
-            (editViewController as! GSGlyphEditViewControllerProtocol).shadowLayer = NULL
+            (editViewController as! GSGlyphEditViewControllerProtocol).shadowLayer = nil
         }
         dragging = false
     }
@@ -315,53 +315,53 @@ class Extrude_Tool: GlyphsPathPlugin {
         // Only show if option to show Extrude HUD is checked
         if (dragging && extrudeInfo) {
             // Adapted from https://github.com/Mark2Mark/Show-Distance-And-Angle-Of-Nodes
-            var scale = editView.scale
+            let scale = editView.scale
 
             // Translate & scale midpoint
-            var midpointWithDistance = translatePoint(node: midpoint, distance: extrudeDistance)
-            var midpointTranslated = NSMakePoint(((midpointWithDistance.x) * scale), ((midpointWithDistance.y - layer.glyphMetrics().ascender) * scale))
+            let midpointWithDistance = translatePoint(node: midpoint, distance: extrudeDistance)
+            let midpointTranslated = NSMakePoint(((midpointWithDistance.x) * scale), ((midpointWithDistance.y - layer.glyphMetrics().ascender) * scale))
 
             // Define text
-            var textAttributes = [
+            let textAttributes = [
                 NSFontAttributeName: NSFont.labelFont(ofSize: 10),
                 NSForegroundColorAttributeName: NSColor.white,
             ]
-            var line1 = String(format: "%.2f", extrudeDistance)
-            var line2 = String(format: "%.2f°", extrudeAngle * 180 / M_PI)
-            var text = "\(line1)\n\(line2)"
-            var displayText = NSAttributedString(string: text, attributes: textAttributes)
+            let line1 = String(format: "%.2f", extrudeDistance)
+            let line2 = String(format: "%.2f°", extrudeAngle * 180 / M_PI)
+            let text = "\(line1)\n\(line2)"
+            let displayText = NSAttributedString(string: text, attributes: textAttributes)
             // Get greater of the two line letter-counts
-            var textLength = max(line1.characters.count, line2.characters.count)
+            let textLength = max(line1.characters.count, line2.characters.count)
 
-            var rectWidth = textLength * 10 - 10
-            var rectHeight = 40
+            let rectWidth = CGFloat(textLength * 10 - 10)
+            let rectHeight = CGFloat(40)
 
-            var midpointAdjusted = NSMakePoint(midpointTranslated.x - rectWidth / 2, midpointTranslated.y - rectHeight / 2)
+            let midpointAdjusted = NSMakePoint(midpointTranslated.x - CGFloat(rectWidth / 2), midpointTranslated.y - CGFloat(rectHeight / 2))
 
             // Draw rectangle bg
-            var myPath = NSBezierPath()
+            let myPath = NSBezierPath()
             NSColor(red: 0, green: 0.6, blue: 1, alpha: 0.75).set()
-            var dirtyRect = NSMakeRect(midpointAdjusted.x, midpointAdjusted.y, rectWidth, rectHeight)
-            myPath.appendBezierPathWithRoundedRect(dirtyRect, xRadius: 8, yRadius: 8)
+            let dirtyRect = NSMakeRect(midpointAdjusted.x, midpointAdjusted.y, rectWidth, rectHeight)
+            myPath.appendRoundedRect(dirtyRect, xRadius: 8, yRadius: 8)
             myPath.append(myPath)
             myPath.fill()
 
             // Draw text
-            displayText.drawAtPoint(NSMakePoint(midpointAdjusted.x + 8, midpointAdjusted.y + 6))
+            displayText.draw(at: NSMakePoint(midpointAdjusted.x + 8, midpointAdjusted.y + 6))
         }
 
     }
 
-    func drawLayer(Layer: GSLayer, aPoint: NSPoint, Active: Bool, Attributes: NSDictionary) {
+    func drawLayer(Layer: GSLayer, aPoint: NSPoint, Active: Bool, Attributes: NSDictionary!) {
         // Draw anythin for this particular layer.
-        super.draw(Layer, at:aPoint, asActive:Active, attributes:Attributes as NSDictionary)
+        super.draw(Layer, at:aPoint, asActive:Active, attributes:Attributes as! [AnyHashable : Any]!)
     }
 
     override func willActivate() {
         // Called when the tool is selected by the user.
-        editView.cursor = NSCursor.resizeLeftRightCursor();
+        editView.cursor = NSCursor.resizeLeftRight();
     }
 
-    func willDeactivate() {}
+    override func willDeactivate() {}
 
 }
