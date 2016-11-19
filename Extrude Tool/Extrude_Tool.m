@@ -280,9 +280,7 @@
     self.dragging = NO;
 }
 
-- (void)drawForeground {
-    // Draw in the foreground, concerns the complete view.
-
+- (void)drawForegroundForLayer:(GSLayer*)Layer {
     // Only show if option to show Extrude HUD is checked
     if (_dragging && extrudeInfo) {
         // Adapted from https://github.com/Mark2Mark/Show-Distance-And-Angle-Of-Nodes
@@ -290,7 +288,7 @@
 
         // Translate & scale midpoint
         NSPoint midpointWithDistance = [self translatePoint:midpoint withDistance:extrudeDistance];
-        NSPoint midpointTranslated = NSMakePoint(((midpointWithDistance.x) * scale), ((midpointWithDistance.y - layer.glyphMetrics.ascender) * scale));
+        NSPoint midpointTranslated = NSMakePoint(midpointWithDistance.x, midpointWithDistance.y);
 
         // Define text
         NSDictionary *textAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont labelFontOfSize:10], NSFontAttributeName,[NSColor whiteColor], NSForegroundColorAttributeName, nil];
@@ -313,8 +311,6 @@
         [myPath appendBezierPathWithRoundedRect:dirtyRect xRadius: 8 yRadius: 8];
         [myPath appendBezierPath:myPath];
         [myPath fill];
-
-
 
         // Draw text
         [displayText drawAtPoint:NSMakePoint(midpointAdjusted.x + 8, midpointAdjusted.y + 6)];
