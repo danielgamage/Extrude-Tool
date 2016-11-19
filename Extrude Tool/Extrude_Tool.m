@@ -291,7 +291,7 @@
         NSPoint midpointTranslated = NSMakePoint(midpointWithDistance.x, midpointWithDistance.y);
 
         // Define text
-        NSDictionary *textAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont labelFontOfSize:10], NSFontAttributeName,[NSColor whiteColor], NSForegroundColorAttributeName, nil];
+        NSDictionary *textAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[NSFont labelFontOfSize:(10 / scale)], NSFontAttributeName,[NSColor whiteColor], NSForegroundColorAttributeName, nil];
         NSString *line1 = [NSString stringWithFormat:@"%.2f", extrudeDistance];
         NSString *line2 = [NSString stringWithFormat:@"%.2f°", extrudeAngle * 180 / M_PI ];
         NSString *text = [NSString stringWithFormat:@"%@\n%@", line1, line2];
@@ -299,8 +299,8 @@
         // Get greater of the two line letter-counts
         int textLength = MAX((int)[line1 length], (int)[line2 length]);
 
-        int rectWidth = textLength * 10 - 10;
-        int rectHeight = 40;
+        int rectWidth = (textLength * 10 - 10) / scale;
+        int rectHeight = (40) / scale;
 
         NSPoint midpointAdjusted = NSMakePoint(midpointTranslated.x - rectWidth / 2, midpointTranslated.y - rectHeight / 2);
 
@@ -308,12 +308,12 @@
         NSBezierPath *myPath = [[NSBezierPath alloc] init];
         [[NSColor colorWithCalibratedRed:0 green:.6 blue:1 alpha:0.75] set];
         NSRect dirtyRect = NSMakeRect(midpointAdjusted.x, midpointAdjusted.y, rectWidth, rectHeight);
-        [myPath appendBezierPathWithRoundedRect:dirtyRect xRadius: 8 yRadius: 8];
+        [myPath appendBezierPathWithRoundedRect:dirtyRect xRadius: 8/scale yRadius: 8/scale];
         [myPath appendBezierPath:myPath];
         [myPath fill];
 
         // Draw text
-        [displayText drawAtPoint:NSMakePoint(midpointAdjusted.x + 8, midpointAdjusted.y + 6)];
+        [displayText drawAtPoint:NSMakePoint(midpointAdjusted.x + 8 / scale, midpointAdjusted.y + 6 / scale)];
     }
 
 }
