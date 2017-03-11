@@ -27,7 +27,7 @@
     NSPoint midpoint;
     NSBezierPath *bgPath;
     GSLayer *layer;
-    NSArray *sortedSelection;
+    NSMutableArray *sortedSelection;
     NSMutableArray *sortedSelectionCoords;
     NSString *extrudeQuantizationString;
     NSTextField *valueField;

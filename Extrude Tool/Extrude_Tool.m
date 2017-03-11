@@ -139,6 +139,44 @@
     }
 }
 
+- (GSNode*) getSibling:(GSNode*)node next:(bool)next {
+    GSPath *path = node.parent;
+    NSUInteger index = [path indexOfNode:node];
+    NSUInteger length = [path.nodes count];
+    NSUInteger siblingIndex;
+    BOOL crossesBounds = NO;
+
+    if (next == YES) {
+        siblingIndex = (index + 1) % length;
+        if (siblingIndex == 0) {
+            // if last node
+            crossesBounds = YES;
+        }
+    } else {
+        siblingIndex = (index - 1 + length) % length; // add (length) in case (index - 1) is negative
+        if (siblingIndex == length - 1) {
+            // if first node
+            crossesBounds = YES;
+        }
+    }
+
+    if (!path.closed && crossesBounds) {
+        // just return the same node if the path is open and we're at a path end
+        return node;
+    } else {
+        GSNode *nextNode = [path nodeAtIndex:siblingIndex];
+        return nextNode;
+    }
+}
+
+- (GSNode*) prevNode:(GSNode*)node {
+    return [self getSibling:node next:NO];
+}
+
+- (GSNode*) nextNode:(GSNode*)node {
+    return [self getSibling:node next:YES];
+}
+
 - (void)mouseDragged:(NSEvent *)theEvent {
     // Called when the mouse is moved with the primary button down.
 
@@ -157,7 +195,7 @@
             // Set background before manipulating activeLayer
             _editViewController.shadowLayer = [layer copy];
 
-            sortedSelection = [layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
+            sortedSelection = [NSMutableArray arrayWithArray:[layer.selection sortedArrayUsingComparator:^NSComparisonResult(GSNode* a, GSNode* b) {
                 // Sort by path parent
                 NSUInteger first = [layer indexOfPath:a.parent];
                 NSUInteger second = [layer indexOfPath:b.parent];
@@ -170,14 +208,11 @@
                 if (first > second) { return NSOrderedDescending; }
                 if (first < second) { return NSOrderedAscending; }
                 return NSOrderedSame;
-            }];
-
-            for (GSNode *node in sortedSelection) {
-                [sortedSelectionCoords addObject:[NSValue valueWithPoint:node.positionPrecise]];
-            }
+            }]];
 
             GSNode *firstNode = sortedSelection[0];
             GSNode *lastNode = [sortedSelection lastObject];
+
             GSPath *path = firstNode.parent;
 
             // If first & last nodes are selected, the selection crosses bounds of the array
@@ -191,6 +226,19 @@
                     firstNode = path.nodes[d]; }
             } else {
                 crossesBounds = NO;
+            }
+
+            while (firstNode.type == OFFCURVE) {
+                GSNode *firstNextNode = [self nextNode:firstNode];
+                [layer removeObjectFromSelection:firstNode];
+                [sortedSelection removeObject:firstNode];
+                firstNode = firstNextNode;
+            }
+            while (lastNode.type == OFFCURVE) {
+                GSNode *lastPrevNode = [self prevNode:lastNode];
+                [layer removeObjectFromSelection:lastNode];
+                [sortedSelection removeObject:lastNode];
+                lastNode = lastPrevNode;
             }
 
             // Get midpoint between first and last nodes
@@ -211,6 +259,10 @@
                 canExtrude = YES;
             } else {
                 canExtrude = NO;
+            }
+
+            for (GSNode *node in sortedSelection) {
+                [sortedSelectionCoords addObject:[NSValue valueWithPoint:node.positionPrecise]];
             }
 
             if (canExtrude == YES) {
