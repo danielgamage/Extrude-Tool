@@ -37,7 +37,7 @@
 
 - (NSUInteger)groupID {
     // Return a number between 50 and 1000 to position the icon in the toolbar.
-    return 20;
+    return 22;
 }
 
 - (NSString *)title {
