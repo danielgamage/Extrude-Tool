@@ -271,8 +271,8 @@
                 // Insert nodes at front and back of selection
                 // shift the last index +1 because a node was inserted before it,
                 // or don't if the selection crosses bounds (the first / last nodes are effectively flipped)
-                [path insertNode:firstHolder atIndex:firstIndex];
-                [path insertNode:lastHolder atIndex:lastIndex + 1 - offset];
+                [path insertObject:firstHolder inNodesAtIndex:firstIndex];
+                [path insertObject:lastHolder inNodesAtIndex:lastIndex + 1 - offset];
 
                 [[path nodeAtIndex:firstIndex + offset] setConnection:SHARP];
                 [[path nodeAtIndex:firstIndex + offset + 1] setConnection:SHARP];
