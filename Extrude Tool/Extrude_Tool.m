@@ -61,12 +61,12 @@
     NSMenuItem *extrudeSliderItem = [[NSMenuItem alloc] initWithTitle:@"Extrude Snapping" action:nil keyEquivalent:@""];
 
     // Make view for Quantization slider
-    CGRect  viewRect = CGRectMake(0, 0, 184, 48);
+    NSRect  viewRect = NSMakeRect(0, 0, 184, 48);
     NSView* sliderView = [[NSView alloc] initWithFrame:viewRect];
     NSInteger margin = 20;
 
     // Label above
-    CGRect labelRect = CGRectMake(margin, 22, sliderView.frame.size.width - margin, 24);
+    NSRect labelRect = NSMakeRect(margin, 22, sliderView.frame.size.width - margin, 24);
     NSTextField *labelField = [[NSTextField alloc] initWithFrame:labelRect];
     [labelField setStringValue:@"Extrusion Snapping"];
     labelField.font = [NSFont menuFontOfSize:11];
@@ -78,7 +78,7 @@
     [sliderView addSubview:labelField];
 
     // Slider input
-    CGRect sliderRect = NSMakeRect(margin, 0, 121, 24);
+    NSRect sliderRect = NSMakeRect(margin, 0, 121, 24);
     NSSlider *slider = [[NSSlider alloc] initWithFrame:sliderRect];
     slider.doubleValue = (double)extrudeQuantization;
     slider.minValue = 0.00;
@@ -91,7 +91,7 @@
     [sliderView addSubview:slider];
 
     // Slider value
-    CGRect valueRect = CGRectMake(slider.frame.origin.x + slider.frame.size.width, 0, viewRect.size.width - slider.frame.origin.x - slider.frame.size.width - 15, 26);
+    NSRect valueRect = NSMakeRect(slider.frame.origin.x + slider.frame.size.width, 0, viewRect.size.width - slider.frame.origin.x - slider.frame.size.width - 15, 26);
     valueField = [[NSTextField alloc] initWithFrame:valueRect];
     [valueField setAlignment:NSTextAlignmentRight];
     [valueField setStringValue:[self updateQuantizationString]];
@@ -116,6 +116,7 @@
     extrudeQuantizationString = [self updateQuantizationString];
     [valueField setStringValue:extrudeQuantizationString];
 }
+
 - (NSString *)updateQuantizationString {
     return (extrudeQuantization == 0) ? @"Off" : [NSString stringWithFormat:@"%i", extrudeQuantization];
 }
@@ -139,7 +140,7 @@
     }
 }
 
-- (GSNode*) getSibling:(GSNode*)node next:(bool)next {
+- (GSNode*)getSibling:(GSNode*)node next:(bool)next {
     GSPath *path = node.parent;
     NSUInteger index = [path indexOfNode:node];
     NSUInteger length = [path.nodes count];
@@ -169,11 +170,11 @@
     }
 }
 
-- (GSNode*) prevNode:(GSNode*)node {
+- (GSNode*)prevNode:(GSNode*)node {
     return [self getSibling:node next:NO];
 }
 
-- (GSNode*) nextNode:(GSNode*)node {
+- (GSNode*)nextNode:(GSNode*)node {
     return [self getSibling:node next:YES];
 }
 
