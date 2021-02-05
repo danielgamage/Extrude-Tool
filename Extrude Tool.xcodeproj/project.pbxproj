@@ -19,7 +19,7 @@
 		6579EC7B1D8BC0E400E662D1 /* Extrude_Tool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Extrude_Tool.h; sourceTree = "<group>"; usesTabs = 0; };
 		6579EC7C1D8BC0E400E662D1 /* Extrude_Tool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Extrude_Tool.m; sourceTree = "<group>"; };
 		6579EC7F1D8BC0E400E662D1 /* ToolbarIconTemplate.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = ToolbarIconTemplate.pdf; sourceTree = "<group>"; };
-		6579EC811D8BC0E400E662D1 /* GlyphsCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GlyphsCore.framework; path = /Applications/Glyphs.app/Contents/Frameworks/GlyphsCore.framework; sourceTree = "<absolute>"; };
+		6579EC811D8BC0E400E662D1 /* GlyphsCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GlyphsCore.framework; path = "/Applications/Glyphs 3.app/Contents/Frameworks/GlyphsCore.framework"; sourceTree = "<absolute>"; };
 		6579EC831D8BC0E400E662D1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -114,16 +114,16 @@
 					6579EC701D8BC0E400E662D1 = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = R466WB565R;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
 			buildConfigurationList = 6579EC6C1D8BC0E400E662D1 /* Build configuration list for PBXProject "Extrude Tool" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				English,
+				en,
 			);
 			mainGroup = 6579EC681D8BC0E400E662D1;
 			productRefGroup = 6579EC721D8BC0E400E662D1 /* Products */;
@@ -199,6 +199,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -236,19 +237,22 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
 		6579EC871D8BC0E400E662D1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEPLOYMENT_LOCATION = YES;
 				DSTROOT = "$(USER_LIBRARY_DIR)/Application Support/Glyphs 3/Plugins";
-				FRAMEWORK_SEARCH_PATHS = "$(SYSTEM_APPS_DIR)/Glyphs.app/Contents/Frameworks";
+				FRAMEWORK_SEARCH_PATHS = "\"$(SYSTEM_APPS_DIR)/Glyphs 3.app/Contents/Frameworks\"";
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.danielgamage.ExtrudeTool;
 				PRODUCT_NAME = ExtrudeTool;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -259,11 +263,13 @@
 		6579EC881D8BC0E400E662D1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(SYSTEM_APPS_DIR)/Glyphs.app/Contents/Frameworks";
+				FRAMEWORK_SEARCH_PATHS = "\"$(SYSTEM_APPS_DIR)/Glyphs 3.app/Contents/Frameworks\"";
 				INFOPLIST_FILE = "Extrude Tool/Info.plist";
 				INSTALL_PATH = /;
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.danielgamage.ExtrudeTool;
 				PRODUCT_NAME = ExtrudeTool;
 				VERSIONING_SYSTEM = "apple-generic";

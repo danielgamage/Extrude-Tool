@@ -204,8 +204,8 @@
                 if (first < second) { return NSOrderedAscending; }
 
                 // Then sort by node index
-                first = [a.parent indexOfNode:a];
-                second = [b.parent indexOfNode:b];
+                first = [(GSPath *)a.parent indexOfNode:a];
+                second = [(GSPath *)b.parent indexOfNode:b];
                 if (first > second) { return NSOrderedDescending; }
                 if (first < second) { return NSOrderedAscending; }
                 return NSOrderedSame;
