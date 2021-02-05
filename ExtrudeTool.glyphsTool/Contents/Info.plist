@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>16A323</string>
+	<string>20D64</string>
 	<key>CFBundleDisplayName</key>
 	<string>ExtrudeTool</string>
 	<key>CFBundleIdentifier</key>
@@ -19,17 +19,21 @@
 	<key>DTCompiler</key>
 	<string>com.apple.compilers.llvm.clang.1_0</string>
 	<key>DTPlatformBuild</key>
-	<string>8A218a</string>
+	<string>12D4e</string>
+	<key>DTPlatformName</key>
+	<string>macosx</string>
 	<key>DTPlatformVersion</key>
-	<string>GM</string>
+	<string>11.1</string>
 	<key>DTSDKBuild</key>
-	<string>16A300</string>
+	<string>20C63</string>
 	<key>DTSDKName</key>
-	<string>macosx10.12</string>
+	<string>macosx11.1</string>
 	<key>DTXcode</key>
-	<string>0800</string>
+	<string>1240</string>
 	<key>DTXcodeBuild</key>
-	<string>8A218a</string>
+	<string>12D4e</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.11</string>
 	<key>UpdateFeedURL</key>
 	<string>https://raw.githubusercontent.com/danielgamage/Extrude-Tool/master/ExtrudeTool.glyphsTool/Contents/Info.plist</string>
 	<key>WorkspacePath</key>
