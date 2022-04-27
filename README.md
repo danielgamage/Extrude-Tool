@@ -22,13 +22,13 @@ By default, the tool will show an overlay with the distance extruded and the ang
 
 | With info | Without info |
 | --- | --- |
-| ![Extrude tool with info](https://github.com/danielgamage/Extrude-Tool/blob/master/images/extrude_info_with.png) | ![Extrude tool without info](https://github.com/danielgamage/Extrude-Tool/blob/master/images/extrude_info_without.png) |
+| ![Extrude tool with info](https://github.com/danielgamage/Extrude-Tool/blob/main/images/extrude_info_with.png) | ![Extrude tool without info](https://github.com/danielgamage/Extrude-Tool/blob/main/images/extrude_info_without.png) |
 
 ### Extrusion Snapping
 
 Alongside the Extrude Info menu item, there is an input that helps snap the distance to a more round number. This is particularly helpful if you want to extrude a distance of some multiple of, say, 8 or 10 units. By default, this is 0 (disabled).
 
-![Extrude tool contextual menu](https://raw.githubusercontent.com/danielgamage/Extrude-Tool/master/images/contextual_menu.png)
+![Extrude tool contextual menu](https://raw.githubusercontent.com/danielgamage/Extrude-Tool/main/images/contextual_menu.png)
 
 ## Roadmap
 To see what's in the pipeline, check out the current issues in [projects](https://github.com/danielgamage/Extrude-Tool/projects/1).
