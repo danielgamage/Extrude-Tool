@@ -6,6 +6,8 @@
 	<string>20D64</string>
 	<key>CFBundleDisplayName</key>
 	<string>ExtrudeTool</string>
+	<key>CFBundleExecutable</key>
+	<string>ExtrudeTool</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.danielgamage.ExtrudeTool</string>
 	<key>CFBundleShortVersionString</key>
