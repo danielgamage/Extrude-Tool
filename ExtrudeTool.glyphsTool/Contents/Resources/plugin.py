@@ -3,6 +3,7 @@
 from __future__ import division, print_function, unicode_literals
 
 import math
+
 import objc
 from AppKit import (
 	NSAttributedString,
@@ -28,6 +29,26 @@ DEFAULTS_DOMAIN = 'com.danielgamage.ExtrudeTool'
 DEFAULTS_SHOW_INFO = DEFAULTS_DOMAIN + '.showInfo'
 DEFAULTS_QUANTIZATION = DEFAULTS_DOMAIN + '.quantization'
 
+# macOS 15 NSCursor frame-resize enums (NSCursor.h). Glyphs' PyObjC does not
+# export these names, but frameResizeCursorFromPosition_inDirections_ works.
+NSCursorFrameResizePositionTop = 1 << 0
+NSCursorFrameResizePositionLeft = 1 << 1
+NSCursorFrameResizePositionRight = 1 << 3
+NSCursorFrameResizePositionTopLeft = (
+	NSCursorFrameResizePositionTop | NSCursorFrameResizePositionLeft
+)
+NSCursorFrameResizePositionTopRight = (
+	NSCursorFrameResizePositionTop | NSCursorFrameResizePositionRight
+)
+NSCursorFrameResizeDirectionsAll = (1 << 0) | (1 << 1)  # Inward | Outward
+
+EXTRUDE_CURSOR_POSITIONS = (
+	NSCursorFrameResizePositionRight,
+	NSCursorFrameResizePositionTopRight,
+	NSCursorFrameResizePositionTop,
+	NSCursorFrameResizePositionTopLeft,
+)
+
 
 class ExtrudeTool(SelectTool):
 
@@ -47,6 +68,13 @@ class ExtrudeTool(SelectTool):
 
 	@objc.python_method
 	def resetDragState(self):
+		self.willExtrude = False
+		self.hoverCursor = None
+		self.resetExtrusionState()
+		self.dragStartPoint = NSPoint(0, 0)
+
+	@objc.python_method
+	def resetExtrusionState(self):
 		self.isExtruding = False
 		self.selectionValid = False
 		self.canExtrude = False
@@ -56,12 +84,14 @@ class ExtrudeTool(SelectTool):
 		self.midpoint = NSPoint(0, 0)
 		self.sortedSelection = []
 		self.sortedSelectionCoords = []
-		self.pathDirection = 1
-		self.dragStartPoint = NSPoint(0, 0)
 
 	@objc.python_method
 	def activate(self):
-		self.editViewController().graphicView().setCursor_(NSCursor.resizeLeftRightCursor())
+		pass
+
+	@objc.python_method
+	def deactivate(self):
+		self.hoverCursor = None
 
 	@objc.python_method
 	def showExtrudeInfo(self):
@@ -137,53 +167,224 @@ class ExtrudeTool(SelectTool):
 		)
 
 	@objc.python_method
+	def pointXY(self, point):
+		if isinstance(point, (tuple, list)):
+			return float(point[0]), float(point[1])
+		return float(point.x), float(point.y)
+
+	@objc.python_method
+	def pathSegments(self, path):
+		"""Yield (startNode, offcurveNodes, endNode) for every segment of the path."""
+		nodes = list(path.nodes)
+		onCurveIndices = [i for i, node in enumerate(nodes) if node.type != OFFCURVE]
+		if len(onCurveIndices) < 2:
+			return
+
+		for position, startIndex in enumerate(onCurveIndices):
+			if position + 1 < len(onCurveIndices):
+				endIndex = onCurveIndices[position + 1]
+			elif path.closed:
+				endIndex = onCurveIndices[0]
+			else:
+				return
+
+			offcurves = []
+			index = (startIndex + 1) % len(nodes)
+			while index != endIndex:
+				offcurves.append(nodes[index])
+				index = (index + 1) % len(nodes)
+
+			yield nodes[startIndex], offcurves, nodes[endIndex]
+
+	@objc.python_method
+	def distanceToSegment(self, loc, startNode, offcurves, endNode):
+		locX, locY = self.pointXY(loc)
+		x0, y0 = self.pointXY(startNode.position)
+		x3, y3 = self.pointXY(endNode.position)
+
+		if len(offcurves) == 2:
+			x1, y1 = self.pointXY(offcurves[0].position)
+			x2, y2 = self.pointXY(offcurves[1].position)
+			closest = float('inf')
+			steps = 24
+			for step in range(steps + 1):
+				t = step / steps
+				mt = 1 - t
+				x = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3
+				y = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3
+				closest = min(closest, math.hypot(locX - x, locY - y))
+			return closest
+
+		dx = x3 - x0
+		dy = y3 - y0
+		lengthSquared = dx * dx + dy * dy
+		if lengthSquared == 0:
+			return math.hypot(locX - x0, locY - y0)
+		t = max(0.0, min(1.0, ((locX - x0) * dx + (locY - y0) * dy) / lengthSquared))
+		return math.hypot(locX - (x0 + t * dx), locY - (y0 + t * dy))
+
+	@objc.python_method
+	def clickTargetsExtrusion(self, layer, loc):
+		selection = self.selectedNodes(layer)
+		if not self.validSelection(selection):
+			return False
+
+		element = self.elementAtPoint_atLayer_(loc, layer)
+		if isinstance(element, GSNode) and element in layer.selection:
+			return True
+
+		scale = self.editViewController().graphicView().scale()
+		tolerance = (5 + Glyphs.handleSize * 2.5) / scale
+		selectedNodeSet = set(selection)
+
+		for path in {node.parent for node in selection}:
+			for startNode, offcurves, endNode in self.pathSegments(path):
+				if startNode not in selectedNodeSet or endNode not in selectedNodeSet:
+					continue
+				if self.distanceToSegment(loc, startNode, offcurves, endNode) < tolerance:
+					return True
+
+		return False
+
+	@objc.python_method
+	def resolveExtrusionSpan(self, layer, selection):
+		"""Return (firstNode, lastNode, remainingSelection, crossesBounds, droppedNodes) or None."""
+		if not selection:
+			return None
+
+		remainingSelection = list(self.sortSelection(layer, selection))
+		firstNode = remainingSelection[0]
+		lastNode = remainingSelection[-1]
+		path = firstNode.parent
+		droppedNodes = []
+
+		if path.closed and path.nodes[0] in remainingSelection and path.nodes[-1] in remainingSelection:
+			crossesBounds = True
+			for node in path.nodes:
+				if node in remainingSelection:
+					lastNode = node
+				else:
+					break
+			for node in reversed(path.nodes):
+				if node in remainingSelection:
+					firstNode = node
+				else:
+					break
+		else:
+			crossesBounds = False
+
+		while firstNode.type == OFFCURVE:
+			nextNode = self.nextNode_(firstNode)
+			if nextNode is firstNode or nextNode not in remainingSelection:
+				return None
+			droppedNodes.append(firstNode)
+			remainingSelection.remove(firstNode)
+			firstNode = nextNode
+
+		while lastNode.type == OFFCURVE:
+			prevNode = self.prevNode_(lastNode)
+			if prevNode is lastNode or prevNode not in remainingSelection:
+				return None
+			droppedNodes.append(lastNode)
+			remainingSelection.remove(lastNode)
+			lastNode = prevNode
+
+		if not remainingSelection:
+			return None
+
+		return firstNode, lastNode, remainingSelection, crossesBounds, droppedNodes
+
+	@objc.python_method
+	def extrusionAngle(self, layer):
+		selection = self.selectedNodes(layer)
+		if not self.validSelection(selection):
+			return None
+		span = self.resolveExtrusionSpan(layer, selection)
+		if span is None:
+			return None
+		firstNode, lastNode = span[0], span[1]
+		return math.atan2(
+			lastNode.y - firstNode.y,
+			lastNode.x - firstNode.x,
+		) - math.pi / 2.0
+
+	@objc.python_method
+	def cursorForExtrusionAngle(self, angle):
+		if angle is None:
+			bucket = 0
+		else:
+			bucket = int(round((math.degrees(angle) % 180) / 45.0)) % 4
+		position = EXTRUDE_CURSOR_POSITIONS[bucket]
+		return NSCursor.frameResizeCursorFromPosition_inDirections_(
+			position, NSCursorFrameResizeDirectionsAll
+		)
+
+	@objc.python_method
+	def inheritedStandardCursor(self):
+		cursor = objc.super(ExtrudeTool, self).standardCursor()
+		if cursor is not None:
+			return cursor
+		return NSCursor.arrowCursor()
+
+	@objc.python_method
+	def updateHoverCursor(self, layer, loc):
+		controller = self.editViewController()
+		if controller is None:
+			return
+		if layer is not None and self.clickTargetsExtrusion(layer, loc):
+			self.hoverCursor = self.cursorForExtrusionAngle(self.extrusionAngle(layer))
+		else:
+			self.hoverCursor = None
+		controller.graphicView().setCursor_(self.hoverCursor or self.inheritedStandardCursor())
+
+	@objc.python_method
+	def updateHoverCursorForEvent(self, theEvent):
+		controller = self.editViewController()
+		if controller is None:
+			return
+		graphicView = controller.graphicView()
+		self.updateHoverCursor(graphicView.activeLayer(), graphicView.getActiveLocation_(theEvent))
+
+	def standardCursor(self):
+		if self.hoverCursor is not None:
+			return self.hoverCursor
+		return self.inheritedStandardCursor()
+
+	# GSToolSelect does its own highlighting in mouseMoved: and ends it by pushing
+	# standardCursor into the view, so the hover state has to be up to date before
+	# calling super.
+	def mouseMoved_(self, theEvent):
+		self.updateHoverCursorForEvent(theEvent)
+		objc.super(ExtrudeTool, self).mouseMoved_(theEvent)
+
+	def updateHighlightedElement_event_(self, layer, event):
+		objc.super(ExtrudeTool, self).updateHighlightedElement_event_(layer, event)
+		if event is not None:
+			self.updateHoverCursorForEvent(event)
+
+	@objc.python_method
 	def beginExtrusion(self, layer):
-		self.resetDragState()
+		self.resetExtrusionState()
 		selection = self.selectedNodes(layer)
 		self.selectionValid = self.validSelection(selection)
 		if not self.selectionValid:
 			return
 
-		self.isExtruding = True
-		self.editViewController().setShadowLayer_(layer.copy())
+		span = self.resolveExtrusionSpan(layer, selection)
+		if span is None:
+			self.selectionValid = False
+			return
 
-		self.sortedSelection = self.sortSelection(layer, selection)
-		firstNode = self.sortedSelection[0]
-		lastNode = self.sortedSelection[-1]
+		firstNode, lastNode, remainingSelection, crossesBounds, droppedNodes = span
 		path = firstNode.parent
 
-		if path.closed and path.nodes[0] in self.sortedSelection and path.nodes[-1] in self.sortedSelection:
-			self.crossesBounds = True
-			for node in path.nodes:
-				if node in self.sortedSelection:
-					lastNode = node
-				else:
-					break
-			for node in reversed(path.nodes):
-				if node in self.sortedSelection:
-					firstNode = node
-				else:
-					break
-		else:
-			self.crossesBounds = False
+		for node in droppedNodes:
+			layer.removeObjectFromSelection_(node)
 
-		while firstNode.type == OFFCURVE:
-			nextNode = self.nextNode_(firstNode)
-			layer.removeObjectFromSelection_(firstNode)
-			self.sortedSelection.remove(firstNode)
-			firstNode = nextNode
-
-		while lastNode.type == OFFCURVE:
-			prevNode = self.prevNode_(lastNode)
-			layer.removeObjectFromSelection_(lastNode)
-			self.sortedSelection.remove(lastNode)
-			lastNode = prevNode
-
-		if not self.sortedSelection:
-			self.selectionValid = False
-			self.isExtruding = False
-			self.editViewController().setShadowLayer_(None)
-			return
+		self.isExtruding = True
+		self.editViewController().setShadowLayer_(layer.copy())
+		self.sortedSelection = remainingSelection
+		self.crossesBounds = crossesBounds
 
 		self.midpoint = NSPoint(
 			(lastNode.x + firstNode.x) / 2.0,
@@ -193,7 +394,6 @@ class ExtrudeTool(SelectTool):
 			lastNode.y - firstNode.y,
 			lastNode.x - firstNode.x,
 		) - math.pi / 2.0
-		self.pathDirection = path.direction
 
 		firstIndex = path.nodes.index(firstNode)
 		lastIndex = path.nodes.index(lastNode) + 1
@@ -222,19 +422,33 @@ class ExtrudeTool(SelectTool):
 			path.nodes[lastIndex - offset + 1].type = LINE
 
 	def mouseDown_(self, theEvent):
-		objc.super(ExtrudeTool, self).mouseDown_(theEvent)
+		graphicView = self.editViewController().graphicView()
+		layer = graphicView.activeLayer()
+		loc = graphicView.getActiveLocation_(theEvent)
+
+		self.willExtrude = self.clickTargetsExtrusion(layer, loc)
+		if self.willExtrude:
+			self.dragStartPoint = loc
+			graphicView.setCursor_(self.cursorForExtrusionAngle(self.extrusionAngle(layer)))
+		else:
+			objc.super(ExtrudeTool, self).mouseDown_(theEvent)
 
 	def mouseDragged_(self, theEvent):
+		if not self.willExtrude:
+			objc.super(ExtrudeTool, self).mouseDragged_(theEvent)
+			return
+
 		graphicView = self.editViewController().graphicView()
 		layer = graphicView.activeLayer()
 		mousePosition = graphicView.getActiveLocation_(theEvent)
 
 		if not self.isExtruding:
-			self.dragStartPoint = mousePosition
 			self.beginExtrusion(layer)
 
 		if self.canExtrude and self.selectionValid:
-			self.extrudeDistance = (mousePosition.x - self.dragStartPoint.x) * (self.pathDirection * -1)
+			deltaX = mousePosition.x - self.dragStartPoint.x
+			deltaY = mousePosition.y - self.dragStartPoint.y
+			self.extrudeDistance = deltaX * math.cos(self.extrudeAngle) + deltaY * math.sin(self.extrudeAngle)
 
 			quantization = self.extrudeQuantization()
 			if quantization != 0:
@@ -247,17 +461,20 @@ class ExtrudeTool(SelectTool):
 				layer.elementDidChange_(node)
 
 	def mouseUp_(self, theEvent):
-		if self.canExtrude and self.selectionValid:
-			layer = self.editViewController().graphicView().activeLayer()
-			if self.isExtruding:
-				for index, node in enumerate(self.sortedSelection):
-					newPos = node.positionPrecise()
-					origin = self.sortedSelectionCoords[index]
-					node.setPositionFast_(origin)
-					node.position = newPos
-			self.editViewController().setShadowLayer_(None)
+		if self.willExtrude:
+			if self.canExtrude and self.selectionValid:
+				if self.isExtruding:
+					for index, node in enumerate(self.sortedSelection):
+						newPos = node.positionPrecise()
+						origin = self.sortedSelectionCoords[index]
+						node.setPositionFast_(origin)
+						node.position = newPos
+				self.editViewController().setShadowLayer_(None)
+		else:
+			objc.super(ExtrudeTool, self).mouseUp_(theEvent)
 
 		self.resetDragState()
+		self.updateHoverCursorForEvent(theEvent)
 
 	def toggleExtrudeInfo_(self, sender):
 		self.setShowExtrudeInfo(not self.showExtrudeInfo())

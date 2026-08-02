@@ -31,6 +31,6 @@
 	<key>productPageURL</key>
 	<string>https://github.com/danielgamage/Extrude-Tool</string>
 	<key>productReleaseNotes</key>
-	<string>Rewritten in Python for Glyphs 4. Settings now persist between sessions.</string>
+	<string>Rewritten in Python for Glyphs 3 and 4. Extrude Info and snapping settings now persist between sessions. Extrude by clicking a selected node or segment and dragging along the extrusion axis. Hover and drag cursors follow the extrusion angle.</string>
 </dict>
 </plist>

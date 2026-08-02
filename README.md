@@ -25,7 +25,7 @@ ln -sf "$(pwd)/ExtrudeTool.glyphsTool" \
 After editing `ExtrudeTool.glyphsTool/Contents/Resources/plugin.py`, restart Glyphs (or reload plugins) to pick up changes.
 
 ## Usage
-Using the Select tool, select a group of connected nodes, switch to the Extrude tool in the top menu (`w` on the keyboard), click, and drag the cursor to the left or right to extrude the nodes inward or outward. The angle at which the nodes are extruded is equal to the angle of the perpendicular of the line that connects the first and last nodes in a selection.
+Activate the Extrude tool in the toolbar (`w` on the keyboard). Select connected nodes by clicking elsewhere in the glyph, then click on a selected node or on a segment of the selected path and drag along the extrusion axis to extrude inward or outward. The extrusion axis is perpendicular to the line connecting the first and last nodes in the selection.
 
 ### Extrude Info
 By default, the tool will show an overlay with the distance extruded and the angle of the extrusion. If this interferes with your work, you can turn it off by right-clicking when the Extrude tool is selected, and toggle "Extrude Info" at the bottom of the contextual menu. This setting is saved between sessions.
