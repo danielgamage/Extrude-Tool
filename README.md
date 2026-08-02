@@ -1,5 +1,5 @@
 # Extrude Tool
-Extrude Tool plugin for [Glyphs.app](https://glyphsapp.com/)
+Extrude Tool plugin for [Glyphs.app](https://glyphsapp.com/) (Glyphs 4)
 
 ![Example GIF of Extrude Tool in use](https://media.giphy.com/media/26gJAkdmmMqWAU5d6/giphy.gif)
 
@@ -12,13 +12,23 @@ Download _ExtrudeTool_ via the Glyphs [Plugin Manager](https://github.com/schrif
 1. Clone or download this repository
 1. (Unzip if necessary) and open the file with the `.glyphsTool` extension.
 1. Follow the "are you sure you want to install" dialogs
-1. Restart glyphs
+1. Restart Glyphs
+
+### Development
+To work on the plugin locally, symlink the bundle into Glyphs 4’s Plugins folder and restart Glyphs:
+
+```bash
+ln -sf "$(pwd)/ExtrudeTool.glyphsTool" \
+  "$HOME/Library/Application Support/Glyphs 4/Plugins/ExtrudeTool.glyphsTool"
+```
+
+After editing `ExtrudeTool.glyphsTool/Contents/Resources/plugin.py`, restart Glyphs (or reload plugins) to pick up changes.
 
 ## Usage
-Using the Select tool, select a group of connected nodes, switch to the Extrude tool in the top menu (`w` on the keyboard), click, and drag the cursor to the left or right to extrude the nodes inward or outward. The angle at which the nodes are extruded is equal to the angle of the perpendicular of the line that connects the first and last nodes in a selection.
+Activate the Extrude tool in the toolbar (`w` on the keyboard). Select connected nodes by clicking elsewhere in the glyph, then click on a selected node or on a segment of the selected path and drag along the extrusion axis to extrude inward or outward. The extrusion axis is perpendicular to the line connecting the first and last nodes in the selection.
 
 ### Extrude Info
-By default, the tool will show an overlay with the distance extruded and the angle of the extrusion. If this interferes with your work, you can turn it off by right-clicking when the Extrude tool is selected, and toggle "Extrude Info" at the bottom of the contextual menu.
+By default, the tool will show an overlay with the distance extruded and the angle of the extrusion. If this interferes with your work, you can turn it off by right-clicking when the Extrude tool is selected, and toggle "Extrude Info" at the bottom of the contextual menu. This setting is saved between sessions.
 
 | With info | Without info |
 | --- | --- |
@@ -26,7 +36,7 @@ By default, the tool will show an overlay with the distance extruded and the ang
 
 ### Extrusion Snapping
 
-Alongside the Extrude Info menu item, there is an input that helps snap the distance to a more round number. This is particularly helpful if you want to extrude a distance of some multiple of, say, 8 or 10 units. By default, this is 0 (disabled).
+Alongside the Extrude Info menu item, there is an input that helps snap the distance to a more round number. This is particularly helpful if you want to extrude a distance of some multiple of, say, 8 or 10 units. By default, this is 0 (disabled). This setting is saved between sessions.
 
 ![Extrude tool contextual menu](https://raw.githubusercontent.com/danielgamage/Extrude-Tool/main/images/contextual_menu.png)
 
